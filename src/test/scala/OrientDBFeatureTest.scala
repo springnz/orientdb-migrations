@@ -5,6 +5,7 @@ import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
+import com.orientechnologies.orient.core.sql.OCommandSQL
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import org.scalatest.{BeforeAndAfterAll, FeatureSpec, GivenWhenThen}
 
@@ -20,8 +21,12 @@ class OrientDBFeatureTest extends FeatureSpec with GivenWhenThen with BeforeAndA
   }
 
   override def afterAll() {
-    db.getMetadata.getSchema.dropClass("User")
-    db.getMetadata.getSchema.dropClass("Person")
+    db.command(new OCommandSQL("DELETE FROM User"))
+    getSchema.dropClass("User")
+    db.command(new OCommandSQL("DELETE FROM Person"))
+    getSchema.dropClass("Person")
+    db.command(new OCommandSQL("DELETE FROM StrictClass"))
+    getSchema.dropClass("StrictClass")
     db.close()
   }
 
@@ -41,8 +46,8 @@ class OrientDBFeatureTest extends FeatureSpec with GivenWhenThen with BeforeAndA
         doc.setClassName("User")
         doc.field("id", i)
         doc.field("user", "user" + i)
+        doc.save()
         size += doc.getSize
-        doc.save
       }
       println("Total Bytes: " + size + ", per record: " + (size / userCount))
       db.declareIntent(null)
@@ -62,6 +67,23 @@ class OrientDBFeatureTest extends FeatureSpec with GivenWhenThen with BeforeAndA
       db.browseClass("User").iterator.asScala.take(userCount / 2).foreach(_.delete())
       val count = db.countClass("User")
       assert(count === (userCount / 2))
+    }
+
+    scenario("Create a schema-full class") {
+      val cat = createClass("StrictClass")
+      cat.setStrictMode(true)
+      val schema = getSchema
+      createProperty(cat, "name", OType.STRING)
+      createProperty(cat, "weight", OType.DOUBLE)
+      schema.save()
+
+      val doc = new ODocument("strict")
+      doc.setClassName("StrictClass")
+      doc.field("name", "cat1")
+      doc.field("weight", 123.0)
+      doc.save()
+      val result = db.q[ODocument]("select * from StrictClass")
+      result.foreach(doc ⇒ println(doc))
     }
   }
 
@@ -86,7 +108,7 @@ class OrientDBFeatureTest extends FeatureSpec with GivenWhenThen with BeforeAndA
 
     scenario("Search JSON") {
       val result = db.q[ODocument]("select account[savings] from Person")
-      result.foreach(doc ⇒ println(doc))
+      result.foreach(println)
 
       assert(Int.unbox(result.head.field("account")) === 1234)
     }

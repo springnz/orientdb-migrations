@@ -1,7 +1,7 @@
 
-import com.orientechnologies.orient.core.db.{ODatabaseComplex, ODatabaseRecordThreadLocal}
+import com.orientechnologies.orient.core.db.{ ODatabaseComplex, ODatabaseRecordThreadLocal }
 import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
-import com.orientechnologies.orient.core.metadata.schema.OType
+import com.orientechnologies.orient.core.metadata.schema.{ OClass, OType }
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 
 import scala.collection.JavaConverters._
@@ -16,11 +16,15 @@ object OrientDBScala {
     }
   }
 
-  def createIndex(className: String, propertyName: String, oType: OType, indexType: INDEX_TYPE) =
-    ODatabaseRecordThreadLocal.INSTANCE.get.getMetadata.getSchema
-      .createClass(className).createProperty(propertyName, oType).createIndex(indexType)
+  def getSchema = ODatabaseRecordThreadLocal.INSTANCE.get.getMetadata.getSchema
 
   def createClass(className: String) =
-    ODatabaseRecordThreadLocal.INSTANCE.get.getMetadata.getSchema.createClass(className)
+    getSchema.createClass(className)
+
+  def createProperty(oClass: OClass, propertyName: String, oType: OType) =
+    oClass.createProperty(propertyName, oType)
+
+  def createIndex(className: String, propertyName: String, oType: OType, indexType: INDEX_TYPE) =
+    createClass(className).createProperty(propertyName, oType).createIndex(indexType)
 
 }
