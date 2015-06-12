@@ -7,6 +7,7 @@ import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
+import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory
 import org.scalatest.{BeforeAndAfterAll, FeatureSpec, GivenWhenThen, ShouldMatchers}
 
 import scala.collection.JavaConverters._
@@ -23,6 +24,10 @@ class OrientDBFeatureTest
   // CREATE DATABASE remote:localhost/test root <root_password> plocal
   val db = new ODatabaseDocumentTx("remote:localhost/test")
   db.open("admin", "admin")
+
+  // CREATE DATABASE remote:localhost/graphtest root root plocal graph
+  val graphFactory = new OrientGraphFactory("remote:localhost/graphtest").setupPool(1, 10)
+  val graph = graphFactory.getTx
 
   override def beforeAll(): Unit = {
   }
@@ -122,7 +127,7 @@ class OrientDBFeatureTest
       db.q[ODocument]("select * from StrictClass").size shouldBe 1
 
       // the following check fails due to the previously described error in OrientDB
-       db.q[ODocument]("select * from StrictClass where rejectedfield=1").size shouldBe 0
+      db.q[ODocument]("select * from StrictClass where rejectedfield=1").size shouldBe 0
     }
 
     scenario("DB access in futures") {
@@ -172,49 +177,21 @@ class OrientDBFeatureTest
     }
   }
 
-  //
-  //  feature("As a Graph DB") {
-  //
-  //    scenario("DB insert records") {
-  //
-  //      def traverse(inNode: OGraphVertex)(op: OGraphVertex ⇒ Unit) {
-  //        op(inNode)
-  //        for (node ← inNode.browseOutEdgesVertexes.asScala) yield {
-  //          traverse(node)(op)
-  //        }
-  //      }
-  //
-  //      val graph: ODatabaseGraphTx = new ODatabaseGraphTx("memory:graph")
-  //      graph.create()
-  //
-  //      val root: OGraphVertex = graph.createVertex.set("id", "root")
-  //
-  //      val a: OGraphVertex = graph.createVertex.set("id", "_a")
-  //      val b: OGraphVertex = graph.createVertex.set("id", "_b")
-  //      val c: OGraphVertex = graph.createVertex.set("id", "_c")
-  //
-  //      val a1: OGraphVertex = graph.createVertex.set("id", "__a1")
-  //      val a2: OGraphVertex = graph.createVertex.set("id", "__a2")
-  //      val b1: OGraphVertex = graph.createVertex.set("id", "__b1")
-  //
-  //      root.link(a)
-  //      root.link(b)
-  //      root.link(c)
-  //      a.link(a1)
-  //      a.link(a2)
-  //
-  //      b.link(b1).save
-  //
-  //      traverse(root)((n: OGraphVertex) ⇒ {
-  //        n.save
-  //        println(n.get("id"))
-  //      })
-  //
-  //      val result = graph.q("select from OGraphVertex")
-  //
-  //      assert(result.size === 7)
-  //
-  //    }
-  //  }
+  feature("As a Graph DB") {
+
+    scenario("DB insert records") {
+
+      val luca = graph.addVertex()
+      luca.setProperty("name", "Luca")
+
+      val marko = graph.addVertex()
+      marko.setProperty("name", "Marko")
+
+      val lucaKnowsMarko = graph.addEdge(null, luca, marko, "knows")
+      println("Created edge: " + lucaKnowsMarko.getId)
+
+      graph.getVertices.asScala.foreach(vertex ⇒ println(vertex.getProperty("name")))
+    }
+  }
 
 }

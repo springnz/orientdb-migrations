@@ -14,8 +14,10 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.4",
   "com.orientechnologies" % "orient-commons" % orientCommonsVersion withSources(),
   "com.orientechnologies" % "orientdb-core" % orientDBVersion withSources(),
+  "com.orientechnologies" % "orientdb-graphdb" % orientDBVersion withSources(),
   "com.orientechnologies" % "orientdb-client" % orientDBVersion withSources(),
-  "com.orientechnologies" % "orientdb-enterprise" % orientDBVersion withSources()
+  "com.orientechnologies" % "orientdb-enterprise" % orientDBVersion withSources(),
+  "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0"
 )
 
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oD")
