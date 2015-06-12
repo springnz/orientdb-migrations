@@ -18,7 +18,7 @@ import scala.concurrent.duration._
 class OrientDBFeatureTest extends FeatureSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
 
   // create a document db on disk
-  val db: ODatabaseDocumentTx = new ODatabaseDocumentTx("local:/tmp/testdb")
+  val db: ODatabaseDocumentTx = new ODatabaseDocumentTx("local:/tmp/testdb" + math.random)
   if (!db.exists) db.create() else db.open("admin", "admin")
 
   override def beforeAll(): Unit = {
