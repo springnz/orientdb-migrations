@@ -1,25 +1,28 @@
+package ylabs.orientdb
 
-import OrientDBScala._
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.orientechnologies.orient.core.exception.OValidationException
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
-import com.orientechnologies.orient.core.sql.OCommandSQL
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
-import org.scalatest.{ BeforeAndAfterAll, FeatureSpec, GivenWhenThen, ShouldMatchers }
+import org.scalatest.{BeforeAndAfterAll, FeatureSpec, GivenWhenThen, ShouldMatchers}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-class OrientDBFeatureTest extends FeatureSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
+class OrientDBFeatureTest
+    extends FeatureSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
 
-  // create a document db on disk
-  val db: ODatabaseDocumentTx = new ODatabaseDocumentTx("local:/tmp/testdb" + math.random)
-  if (!db.exists) db.create() else db.open("admin", "admin")
+  import OrientDBScala._
+
+  // first need to run the following with console.sh:
+  // CREATE DATABASE remote:localhost/test root <root_password> plocal
+  val db = new ODatabaseDocumentTx("remote:localhost/test")
+  db.open("admin", "admin")
 
   override def beforeAll(): Unit = {
   }
@@ -32,7 +35,6 @@ class OrientDBFeatureTest extends FeatureSpec with ShouldMatchers with GivenWhen
         sqlCommand(s"delete from $className")
         dropClass(className)
     }
-    db.close()
   }
 
   def time[R](block: ⇒ R): R = {
@@ -114,18 +116,13 @@ class OrientDBFeatureTest extends FeatureSpec with ShouldMatchers with GivenWhen
 
       intercept[OValidationException] {
         doc.field("notAllowedBySchema", 1)
-        /**
-          * There seems to be an error in OrientDB.
-          * The following save() call throws an exception, as expected, but also saves the new field (which it should not).
-          * This edge case only occurs if the doc has already been saved.
-          */
         doc.save()
       }
 
       db.q[ODocument]("select * from StrictClass").size shouldBe 1
 
       // the following check fails due to the previously described error in OrientDB
-      // db.q[ODocument]("select * from StrictClass where rejectedfield=1").size shouldBe 0
+       db.q[ODocument]("select * from StrictClass where rejectedfield=1").size shouldBe 0
     }
 
     scenario("DB access in futures") {
