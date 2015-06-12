@@ -1,17 +1,21 @@
 
 import OrientDBScala._
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
+import com.orientechnologies.orient.core.exception.OValidationException
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.sql.OCommandSQL
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
-import org.scalatest.{BeforeAndAfterAll, FeatureSpec, GivenWhenThen}
+import org.scalatest.{ BeforeAndAfterAll, FeatureSpec, GivenWhenThen, ShouldMatchers }
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
-class OrientDBFeatureTest extends FeatureSpec with GivenWhenThen with BeforeAndAfterAll {
+class OrientDBFeatureTest extends FeatureSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
 
   // create a document db on disk
   val db: ODatabaseDocumentTx = new ODatabaseDocumentTx("local:/tmp/testdb")
@@ -21,69 +25,126 @@ class OrientDBFeatureTest extends FeatureSpec with GivenWhenThen with BeforeAndA
   }
 
   override def afterAll() {
-    db.command(new OCommandSQL("DELETE FROM User"))
-    getSchema.dropClass("User")
-    db.command(new OCommandSQL("DELETE FROM Person"))
-    getSchema.dropClass("Person")
-    db.command(new OCommandSQL("DELETE FROM StrictClass"))
-    getSchema.dropClass("StrictClass")
+    implicit val _db = db
+    val classNames = List("User", "Person", "StrictClass", "TestClass")
+    classNames.foreach {
+      className ⇒
+        sqlCommand(s"delete from $className")
+        dropClass(className)
+    }
     db.close()
+  }
+
+  def time[R](block: ⇒ R): R = {
+    val t0 = System.nanoTime()
+    val result = block // call-by-name
+    val t1 = System.nanoTime()
+    println("Elapsed time: " + (t1 - t0) / 1000000 + "ms")
+    result
   }
 
   //run tests
   feature("As a Document DB") {
 
-    val userCount = 1000
+    val userCount = 10000
 
     scenario(s"DB insert $userCount records") {
-      createIndex("User", "user", OType.STRING, INDEX_TYPE.UNIQUE)
-      db.declareIntent(new OIntentMassiveInsert())
-      db.begin(TXTYPE.NOTX)
-      var size = 0
-      val doc = new ODocument("user")
-      (1 to userCount).foreach { i ⇒
-        doc.reset
-        doc.setClassName("User")
-        doc.field("id", i)
-        doc.field("user", "user" + i)
-        doc.save()
-        size += doc.getSize
-      }
-      println("Total Bytes: " + size + ", per record: " + (size / userCount))
-      db.declareIntent(null)
-      val count = db.countClass("User")
+      time {
+        implicit val _db = db
+        createIndex("User", "user", OType.STRING, INDEX_TYPE.UNIQUE)
+        db.declareIntent(new OIntentMassiveInsert())
+        db.begin(TXTYPE.NOTX)
+        var size = 0
+        val doc = new ODocument("user")
+        (1 to userCount).foreach { i ⇒
+          doc.reset
+          doc.setClassName("User")
+          doc.field("id", i)
+          doc.field("user", "user" + i)
+          doc.save()
+          size += doc.getSize
+        }
+        println("Total Bytes: " + size + ", per record: " + (size / userCount))
+        db.declareIntent(null)
+        val count = db.countClass("User")
 
-      assert(userCount === count)
+        assert(userCount === count)
+      }
     }
 
     scenario("DB Search") {
-      val result = db.q[ODocument]("select user from User where user = 'user10'")
-      result.foreach(doc ⇒ println(doc))
+      time {
+        val result = db.q[ODocument]("select user from User where user = ?", "user10")
+        result.foreach(doc ⇒ println(doc))
 
-      assert(result.head.field("user").toString === "user10")
+        assert(result.head.field("user").toString === "user10")
+      }
+    }
+
+    scenario("DB select all") {
+      time {
+        val result = db.q[ODocument]("select * from User")
+        println(s"Retrieved ${result.size} records")
+      }
     }
 
     scenario(s"DB delete ${userCount / 2} records") {
-      db.browseClass("User").iterator.asScala.take(userCount / 2).foreach(_.delete())
-      val count = db.countClass("User")
-      assert(count === (userCount / 2))
+      time {
+        db.browseClass("User").iterator.asScala.take(userCount / 2).foreach(_.delete())
+        val count = db.countClass("User")
+        assert(count === (userCount / 2))
+      }
     }
 
     scenario("Create a schema-full class") {
+      implicit val _db = db
+      val schema = getSchema
       val cat = createClass("StrictClass")
       cat.setStrictMode(true)
-      val schema = getSchema
-      createProperty(cat, "name", OType.STRING)
-      createProperty(cat, "weight", OType.DOUBLE)
+      createProperty(cat, "name", OType.STRING).setMandatory(true)
+      createProperty(cat, "weight", OType.DOUBLE).setMandatory(true)
       schema.save()
 
-      val doc = new ODocument("strict")
+      val doc = new ODocument()
       doc.setClassName("StrictClass")
+
       doc.field("name", "cat1")
       doc.field("weight", 123.0)
       doc.save()
-      val result = db.q[ODocument]("select * from StrictClass")
-      result.foreach(doc ⇒ println(doc))
+
+      intercept[OValidationException] {
+        doc.field("notAllowedBySchema", 1)
+        /**
+          * There seems to be an error in OrientDB.
+          * The following save() call throws an exception, as expected, but also saves the new field (which it should not).
+          * This edge case only occurs if the doc has already been saved.
+          */
+        doc.save()
+      }
+
+      db.q[ODocument]("select * from StrictClass").size shouldBe 1
+
+      // the following check fails due to the previously described error in OrientDB
+      // db.q[ODocument]("select * from StrictClass where rejectedfield=1").size shouldBe 0
+    }
+
+    scenario("DB access in futures") {
+      implicit val _db = db
+
+      val className = "TestClass"
+
+      val f = dbFuture {
+        val testClass = createClass(className)
+        val doc = new ODocument()
+        doc.setClassName(className)
+        doc.field("id", 1)
+        doc.save()
+      }
+
+      Await.result(f, 10.seconds)
+
+      val result = db.q[ODocument](s"select * from $className where id = 1")
+      result.size shouldBe 1
     }
   }
 
