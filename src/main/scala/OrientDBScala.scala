@@ -43,7 +43,6 @@ object OrientDBScala {
   def dbFuture[T](block: ⇒ T)(implicit db: ODatabaseRecord, ec: ExecutionContext): Future[T] =
     Future {
       ODatabaseRecordThreadLocal.INSTANCE.set(db)
-      implicit val _db = db
       block
     }
 
