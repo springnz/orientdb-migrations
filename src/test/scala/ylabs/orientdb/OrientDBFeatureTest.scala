@@ -8,7 +8,7 @@ import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory
-import org.scalatest.{BeforeAndAfterAll, FeatureSpec, GivenWhenThen, ShouldMatchers}
+import org.scalatest.{BeforeAndAfterAll, WordSpec, GivenWhenThen, ShouldMatchers}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 class OrientDBFeatureTest
-    extends FeatureSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
+    extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
 
   import OrientDBScala._
 
@@ -50,12 +50,11 @@ class OrientDBFeatureTest
     result
   }
 
-  //run tests
-  feature("As a Document DB") {
+  "As a Document DB" should {
 
     val userCount = 10000
 
-    scenario(s"DB insert $userCount records") {
+    s"DB insert $userCount records" in {
       time {
         implicit val _db = db
         createIndex("User", "user", OType.STRING, INDEX_TYPE.UNIQUE)
@@ -79,7 +78,7 @@ class OrientDBFeatureTest
       }
     }
 
-    scenario("DB Search") {
+    "DB Search" in {
       time {
         val result = db.q[ODocument]("select user from User where user = ?", "user10")
         result.foreach(doc ⇒ println(doc))
@@ -88,14 +87,14 @@ class OrientDBFeatureTest
       }
     }
 
-    scenario("DB select all") {
+    "DB select all" in {
       time {
         val result = db.q[ODocument]("select * from User")
         println(s"Retrieved ${result.size} records")
       }
     }
 
-    scenario(s"DB delete ${userCount / 2} records") {
+    s"DB delete ${userCount / 2} records" in {
       time {
         db.browseClass("User").iterator.asScala.take(userCount / 2).foreach(_.delete())
         val count = db.countClass("User")
@@ -103,7 +102,7 @@ class OrientDBFeatureTest
       }
     }
 
-    scenario("Create a schema-full class") {
+    "Create a schema-full class" in {
       implicit val _db = db
       val schema = getSchema
       val cat = createClass("StrictClass")
@@ -130,7 +129,7 @@ class OrientDBFeatureTest
       db.q[ODocument]("select * from StrictClass where rejectedfield=1").size shouldBe 0
     }
 
-    scenario("DB access in futures") {
+    "DB access in futures" in {
       implicit val _db = db
 
       val className = "TestClass"
@@ -150,8 +149,8 @@ class OrientDBFeatureTest
     }
   }
 
-  feature("Works with JSON") {
-    scenario("Insert JSON") {
+  "Works with JSON" should {
+    "Insert JSON" in {
       val doc = new ODocument("Person")
       val json =
         """
@@ -169,7 +168,7 @@ class OrientDBFeatureTest
       assert(db.countClass("Person") === 1)
     }
 
-    scenario("Search JSON") {
+    "Search JSON" in {
       val result = db.q[ODocument]("select account[savings] from Person")
       result.foreach(println)
 
@@ -177,9 +176,9 @@ class OrientDBFeatureTest
     }
   }
 
-  feature("As a Graph DB") {
+  "As a Graph DB" should {
 
-    scenario("DB insert records") {
+    "DB insert records" in {
 
       val luca = graph.addVertex()
       luca.setProperty("name", "Luca")
