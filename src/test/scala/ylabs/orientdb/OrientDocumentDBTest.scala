@@ -7,7 +7,7 @@ import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
-import org.scalatest._
+import org.scalatest.{BeforeAndAfterAll, WordSpec, GivenWhenThen, ShouldMatchers}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
