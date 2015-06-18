@@ -8,7 +8,7 @@ import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory
-import org.scalatest.{BeforeAndAfterAll, WordSpec, GivenWhenThen, ShouldMatchers}
+import org.scalatest._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -16,9 +16,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 class OrientDBFeatureTest
-    extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
-
-  import OrientDBScala._
+    extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll
+    with OrientDocumentDBScala {
 
   // first need to run the following with console.sh:
   // CREATE DATABASE remote:localhost/test root <root_password> plocal
