@@ -7,7 +7,6 @@ import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
-import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory
 import org.scalatest._
 
 import scala.collection.JavaConverters._
@@ -15,7 +14,7 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-class OrientDBFeatureTest
+class OrientDocumentDBTest
     extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll
     with OrientDocumentDBScala {
 
@@ -23,10 +22,6 @@ class OrientDBFeatureTest
   // CREATE DATABASE remote:localhost/test root <root_password> plocal
   val db = new ODatabaseDocumentTx("remote:localhost/test")
   db.open("admin", "admin")
-
-  // CREATE DATABASE remote:localhost/graphtest root root plocal graph
-  val graphFactory = new OrientGraphFactory("remote:localhost/graphtest").setupPool(1, 10)
-  val graph = graphFactory.getTx
 
   override def beforeAll(): Unit = {
   }
@@ -49,7 +44,7 @@ class OrientDBFeatureTest
     result
   }
 
-  "As a Document DB" should {
+  "Document DB" should {
 
     val userCount = 10000
 
@@ -174,22 +169,4 @@ class OrientDBFeatureTest
       assert(Int.unbox(result.head.field("account")) === 1234)
     }
   }
-
-  "As a Graph DB" should {
-
-    "DB insert records" in {
-
-      val luca = graph.addVertex()
-      luca.setProperty("name", "Luca")
-
-      val marko = graph.addVertex()
-      marko.setProperty("name", "Marko")
-
-      val lucaKnowsMarko = graph.addEdge(null, luca, marko, "knows")
-      println("Created edge: " + lucaKnowsMarko.getId)
-
-      graph.getVertices.asScala.foreach(vertex ⇒ println(vertex.getProperty("name")))
-    }
-  }
-
 }
