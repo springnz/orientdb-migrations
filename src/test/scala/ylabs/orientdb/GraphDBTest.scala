@@ -53,7 +53,7 @@ class GraphDBTest extends WordSpec with ShouldMatchers {
     }
 
   "tinkerpop api" should {
-    "create scenario graph" in {
+    "create scenario graph" ignore {
       println("starting to delete the existing elements")
       graph.getEdges.asScala.foreach(_.remove())
       graph.getVertices.asScala.foreach(_.remove())
