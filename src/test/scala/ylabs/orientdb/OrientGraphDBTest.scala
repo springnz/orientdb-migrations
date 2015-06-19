@@ -7,8 +7,7 @@ import scala.collection.JavaConverters._
 
 class OrientGraphDBTest extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll {
 
-  // CREATE DATABASE remote:localhost/graphtest root root plocal graph
-  val graphFactory = new OrientGraphFactory("remote:localhost/graphtest").setupPool(1, 10)
+  val graphFactory = new OrientGraphFactory("memory:graphtest").setupPool(1, 10)
   val graph = graphFactory.getTx
 
   "Graph DB" should {

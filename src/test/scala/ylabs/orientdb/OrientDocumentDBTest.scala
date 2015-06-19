@@ -18,10 +18,8 @@ class OrientDocumentDBTest
     extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll
     with OrientDocumentDBScala {
 
-  // first need to run the following with console.sh:
-  // CREATE DATABASE remote:localhost/test root <root_password> plocal
-  val db = new ODatabaseDocumentTx("remote:localhost/test")
-  db.open("admin", "admin")
+  val db = new ODatabaseDocumentTx("memory:doctest")
+  db.create()
 
   override def beforeAll(): Unit = {
   }
