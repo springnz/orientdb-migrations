@@ -3,8 +3,8 @@ package ylabs.orientdb
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import org.scalatest.WordSpec
 import org.scalatest.ShouldMatchers
-import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
+import collection.JavaConversions._
+import concurrent.ExecutionContext.Implicits.global
 import collection.mutable
 import org.apache.tinkerpop.gremlin.orientdb.structure._
 import gremlin.scala._
@@ -19,22 +19,17 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
 
   "tinkerpop3 api" should {
     "lookup vertices by id" in {
-      val list = gs.V("#9:2", "#9:10").toList
+      val list = gs.V("#9:202", "#9:210").toList
       list should have length 2
     }
 
     "set property on edge" in {
-      val v = gs.V("#9:2").head
-      println("before")
-      println(v.property("testProperty1"))
-      v.property("testProperty1", "testValue1")
-      v.property("testProperty2", "testValue2")
-      println("after")
-      println(v.property("testProperty1"))
-      println(v.property("testProperty2"))
+      val v = gs.V.head
+      val key = "testProperty"
+      v.property(key, "testValue1")
 
-      println("more:")
-      println(v.property("testProperty1").value())
+      v.property[String](key).value shouldBe "testValue1"
+      gs.V(v.id).values(key).toList shouldBe List("testValue1")
     }
   }
 
