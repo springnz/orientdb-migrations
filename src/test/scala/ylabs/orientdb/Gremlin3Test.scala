@@ -22,6 +22,20 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       val list = gs.V("#9:2", "#9:10").toList
       list should have length 2
     }
+
+    "set property on edge" in {
+      val v = gs.V("#9:2").head
+      println("before")
+      println(v.property("testProperty1"))
+      v.property("testProperty1", "testValue1")
+      v.property("testProperty2", "testValue2")
+      println("after")
+      println(v.property("testProperty1"))
+      println(v.property("testProperty2"))
+
+      println("more:")
+      println(v.property("testProperty1").value())
+    }
   }
 
 
