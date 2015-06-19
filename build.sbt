@@ -5,8 +5,8 @@ scalaVersion := "2.11.6"
 val orientDBVersion = "2.1-rc4"
 
 resolvers ++= Seq(
-  "Orient Technologies Maven2 Repository" at "http://www.orientechnologies.com/listing/m2",
-  Resolver.mavenLocal)
+  Resolver.mavenLocal,
+  "Orient Technologies Maven2 Repository" at "http://www.orientechnologies.com/listing/m2")
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.4",
