@@ -18,9 +18,16 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
   val gs = GremlinScala(graph)
 
   "tinkerpop3 api" should {
-    "lookup vertices by id" in {
-      val list = gs.V("#9:202", "#9:210").toList
-      list should have length 2
+    "lookup vertices by id" when {
+      "vertices exist" in {
+        val list = gs.V("#9:202", "#9:210").toList
+        list should have length 2
+      }
+
+      "vertices don't exist" in {
+        val list = gs.V("#3:999").toList
+        list should have length 0
+      }
     }
 
     "set property on edge" in {
