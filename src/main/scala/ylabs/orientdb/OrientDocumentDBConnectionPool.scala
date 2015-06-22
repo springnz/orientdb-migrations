@@ -3,6 +3,7 @@ package ylabs.orientdb
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import ylabs.logging.Logging
+import ylabs.util.Pimpers._
 
 import scala.util.Try
 
