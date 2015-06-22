@@ -1,6 +1,7 @@
 package ylabs.orientdb
 
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
+import com.orientechnologies.orient.core.record.impl.ODocument
 import org.scalatest.WordSpec
 import org.scalatest.ShouldMatchers
 import collection.JavaConversions._
@@ -8,6 +9,7 @@ import concurrent.ExecutionContext.Implicits.global
 import collection.mutable
 import org.apache.tinkerpop.gremlin.orientdb.structure._
 import gremlin.scala._
+import java.util.{ArrayList => JArrayList}
 
 class Gremlin3Test extends WordSpec with ShouldMatchers {
   // import OrientDBScala._
@@ -53,6 +55,14 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
         val v = g.addVertex(Map(property1, property2))
         gs.V(v.id).values[String]("key1", "key2").toList shouldBe List("value1", "value2")
       }
+    }
+
+    "execute arbitrary orient-SQL" in {
+      val results: Seq[ODocument] = graph.executeSql("select from V limit 10") match {
+        case lst: JArrayList[ODocument] => lst.toSeq
+      }
+      results should have length 10
+      // results.foreach println
     }
   }
 
@@ -127,17 +137,6 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
   //     // println(graph.getEdges.asScala)
   //     // graph.getVertices.asScala.foreach(vertex ⇒ println(vertex.getProperty("name")))
   //   }
-
-  //   "insert some DB records" ignore {
-  //     time {
-  //       val luca = graph.addVertex(null, "name", "Luca")
-  //       val marko = graph.addVertex(null, "name", "Marko")
-  //       val lucaKnowsMarko = graph.addEdge(null, luca, marko, "knows")
-
-  //       graph.getVertices.asScala.foreach(vertex ⇒ println(vertex.getProperty("name")))
-  //     }
-  //   }
-  // }
 
   // def time[R](block: ⇒ R): R = {
   //   val t0 = System.nanoTime()
