@@ -38,6 +38,22 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       v.property[String](key).value shouldBe "testValue1"
       gs.V(v.id).values(key).toList shouldBe List("testValue1")
     }
+
+    "add a vertex" when {
+      val g = ScalaGraph(graph)
+
+      "using plain vertex" in {
+        val v = g.addVertex()
+        gs.V(v.id).toList should have length 1
+      }
+
+      "using properties" in {
+        val property1 = "key1" -> "value1"
+        val property2 = "key2" -> "value2"
+        val v = g.addVertex(Map(property1, property2))
+        gs.V(v.id).values[String]("key1", "key2").toList shouldBe List("value1", "value2")
+      }
+    }
   }
 
 
