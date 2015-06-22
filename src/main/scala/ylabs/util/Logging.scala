@@ -1,4 +1,4 @@
-package ylabs.logging
+package ylabs.util
 
 import org.slf4j.LoggerFactory
 

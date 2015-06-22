@@ -7,7 +7,7 @@ import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.{ OClass, OType }
 import com.orientechnologies.orient.core.sql.OCommandSQL
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
-import ylabs.logging.Logging
+import ylabs.util.Logging
 import ylabs.util.Pimpers._
 
 import scala.collection.JavaConverters._
