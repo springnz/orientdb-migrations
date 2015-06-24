@@ -3,6 +3,8 @@ package ylabs.orientdb
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.sql.query.OResultSet
+import com.orientechnologies.orient.core.iterator.ORecordIteratorClass
+import com.orientechnologies.orient.core.record.ORecord
 import org.scalatest.WordSpec
 import org.scalatest.ShouldMatchers
 import collection.JavaConversions._
@@ -39,7 +41,7 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       gs.V(v.id).values(key).toList shouldBe List("testValue1")
     }
 
-    "add a vertex" when {
+    "adds a vertex" when {
       "using plain vertex" in new Fixture {
         val v = sg.addVertex()
         gs.V(v.id).toList should have length 1
@@ -50,6 +52,25 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
         val property2 = "key2" -> "value2"
         val v = sg.addVertex(Map(property1, property2))
         gs.V(v.id).values[String]("key1", "key2").toList shouldBe List("value1", "value2")
+      }
+
+      "using properties with OrientGraph" in new Fixture {
+        val v = graph.addVertex("key1", "value1", "key2", "value2")
+        gs.V(v.id).values[String]("key1", "key2").toList shouldBe List("value1", "value2")
+      }
+
+      //TODO: this only works with remote graph, not in memory graph...
+      "using labels" in new RemoteGraphFixture {
+      // "using labels" in new Fixture {
+        val v1 = sg.addVertex("label1")
+        val v2 = sg.addVertex("label2")
+        val v3 = sg.addVertex()
+
+        val labels = gs.V.label.toSet
+        labels should have size 3
+        labels should contain("V")
+        labels should contain("label1")
+        labels should contain("label2")
       }
     }
 
@@ -68,10 +89,15 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
   }
 
   trait Fixture {
-    // first need to run the following with console.sh:
-    // CREATE DATABASE remote:localhost/graphtest root root plocal graph
     // val graph = new OrientGraphFactory("remote:localhost/graphtest", "root", "root").getTx()
-    val graph = new OrientGraphFactory("memory:test").getTx()
+    val graph = new OrientGraphFactory(s"memory:test-${math.random}").getTx()
+    val gs = GremlinScala(graph)
+    val sg = ScalaGraph(graph)
+  }
+
+  trait RemoteGraphFixture {
+    val graphUri = "remote:localhost/test"
+    val graph = new OrientGraphFactory(graphUri, "root", "root").getTx()
     val gs = GremlinScala(graph)
     val sg = ScalaGraph(graph)
   }
