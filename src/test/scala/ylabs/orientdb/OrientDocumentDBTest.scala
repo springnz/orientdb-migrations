@@ -98,12 +98,16 @@ class OrientDocumentDBTest
       strictClass.createProperty("name", OType.STRING).setMandatory(true).createIndex(INDEX_TYPE.UNIQUE)
       strictClass.createProperty("weight", OType.DOUBLE).setMandatory(true)
 
-      val doc = new ODocument()
-      doc.setClassName("StrictClass")
+      def insert(name: String, weight: Double): ODocument = {
+        val doc = new ODocument()
+        doc.setClassName("StrictClass")
 
-      doc.field("name", "cat1")
-      doc.field("weight", 123.0)
-      doc.save()
+        doc.field("name", name)
+        doc.field("weight", weight)
+        doc.save()
+      }
+
+      val doc = insert("jones", 123.0)
 
       intercept[OValidationException] {
         doc.field("notAllowedBySchema", 1)
@@ -111,10 +115,7 @@ class OrientDocumentDBTest
       }
 
       db.q[ODocument]("select * from StrictClass").size shouldBe 1
-
-      // the following check fails due to the previously described error in OrientDB
       db.q[ODocument]("select * from StrictClass where rejectedfield=1").size shouldBe 0
-
     }
 
     "DB access in futures" in {
