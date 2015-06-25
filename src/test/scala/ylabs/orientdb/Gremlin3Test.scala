@@ -12,27 +12,25 @@ import concurrent.ExecutionContext.Implicits.global
 import collection.mutable
 import org.apache.tinkerpop.gremlin.orientdb.structure._
 import gremlin.scala._
-import java.util.{ArrayList => JArrayList}
+import java.util.{ ArrayList ⇒ JArrayList }
 
 class Gremlin3Test extends WordSpec with ShouldMatchers {
 
-  "tinkerpop3 api" should {
-    "lookup vertices by id" when {
-      "vertices exist" in new Fixture {
-        val v1 = sg.addVertex()
-        val v2 = sg.addVertex()
-        val v3 = sg.addVertex()
-        val list = gs.V(v1.id, v3.id).toList
-        list should have length 2
-      }
-
-      "vertices don't exist" in new Fixture {
-        val list = gs.V("#3:999").toList
-        list should have length 0
-      }
+  "vertices" should {
+    "be found if they exist" in new Fixture {
+      val v1 = sg.addVertex()
+      val v2 = sg.addVertex()
+      val v3 = sg.addVertex()
+      val list = gs.V(v1.id, v3.id).toList
+      list should have length 2
     }
 
-    "set property on edge" in new Fixture {
+    "not be found if they don't exist" in new Fixture {
+      val list = gs.V("#3:999").toList
+      list should have length 0
+    }
+
+    "set property after creation" in new Fixture {
       val v = sg.addVertex().vertex
       val key = "testProperty"
       v.property(key, "testValue1")
@@ -41,51 +39,39 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       gs.V(v.id).values(key).toList shouldBe List("testValue1")
     }
 
-    "adds a vertex" when {
-      "using plain vertex" in new Fixture {
-        val v = sg.addVertex()
-        gs.V(v.id).toList should have length 1
-      }
+    "set property during creation" in new Fixture {
+      val property1 = "key1" → "value1"
+      val property2 = "key2" → "value2"
+      val v = sg.addVertex(Map(property1, property2))
+      gs.V(v.id).values[String]("key1", "key2").toList shouldBe List("value1", "value2")
+    }
 
-      "using properties" in new Fixture {
-        val property1 = "key1" -> "value1"
-        val property2 = "key2" -> "value2"
-        val v = sg.addVertex(Map(property1, property2))
-        gs.V(v.id).values[String]("key1", "key2").toList shouldBe List("value1", "value2")
-      }
-
-      "using properties with OrientGraph" in new Fixture {
-        val v = graph.addVertex("key1", "value1", "key2", "value2")
-        gs.V(v.id).values[String]("key1", "key2").toList shouldBe List("value1", "value2")
-      }
-
-      //TODO: this only works with remote graph, not in memory graph...
-      "using labels" in new RemoteGraphFixture {
+    //TODO: this only works with remote graph, not in memory graph...
+    "support labels" in new RemoteGraphFixture {
       // "using labels" in new Fixture {
-        val v1 = sg.addVertex("label1")
-        val v2 = sg.addVertex("label2")
-        val v3 = sg.addVertex()
+      val v1 = sg.addVertex("label1")
+      val v2 = sg.addVertex("label2")
+      val v3 = sg.addVertex()
 
-        val labels = gs.V.label.toSet
-        labels should have size 3
-        labels should contain("V")
-        labels should contain("label1")
-        labels should contain("label2")
-      }
+      val labels = gs.V.label.toSet
+      // labels should have size 3
+      labels should contain("V")
+      labels should contain("label1")
+      labels should contain("label2")
+    }
+  }
+
+  "execute arbitrary orient-SQL" in new Fixture {
+    (1 to 20) foreach { _ ⇒
+      sg.addVertex()
     }
 
-    "execute arbitrary orient-SQL" in new Fixture {
-      (1 to 20) foreach {_ =>
-        sg.addVertex()
-      }
-
-      val results: Seq[_] = graph.executeSql("select from V limit 10") match {
-        case lst: JArrayList[_] => lst.toSeq
-        case r: OResultSet[_] => r.iterator().toSeq
-        case other => println(other.getClass()); println(other); ???
-      }
-      results should have length 10
+    val results: Seq[_] = graph.executeSql("select from V limit 10") match {
+      case lst: JArrayList[_] ⇒ lst.toSeq
+      case r: OResultSet[_]   ⇒ r.iterator().toSeq
+      case other              ⇒ println(other.getClass()); println(other); ???
     }
+    results should have length 10
   }
 
   trait Fixture {
