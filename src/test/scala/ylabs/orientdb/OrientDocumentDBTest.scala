@@ -6,6 +6,7 @@ import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
+import com.orientechnologies.orient.core.storage.ORecordDuplicatedException
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import org.scalatest.{ BeforeAndAfterAll, GivenWhenThen, ShouldMatchers, WordSpec }
 
@@ -13,6 +14,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.util.Try
 
 class OrientDocumentDBTest
     extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll
@@ -27,9 +29,7 @@ class OrientDocumentDBTest
   override def afterAll() {
     val classNames = List("User", "Person", "StrictClass", "TestClass")
     classNames.foreach {
-      className ⇒
-        sqlCommand(s"delete from $className")
-        dropClass(className)
+      className ⇒ sqlCommand(s"delete from $className")
     }
   }
 
@@ -92,7 +92,7 @@ class OrientDocumentDBTest
       }
     }
 
-    "Create a schema-full class" in {
+    "Create, insert, update a schema-full class" in {
       val strictClass = createClass("StrictClass")
       strictClass.setStrictMode(true)
       strictClass.createProperty("name", OType.STRING).setMandatory(true).createIndex(INDEX_TYPE.UNIQUE)
@@ -114,8 +114,22 @@ class OrientDocumentDBTest
         doc.save()
       }
 
-      db.q[ODocument]("select * from StrictClass").size shouldBe 1
-      db.q[ODocument]("select * from StrictClass where rejectedfield=1").size shouldBe 0
+      db.count("select count(*) from StrictClass") shouldBe 1
+      db.count("select count(*) from StrictClass where rejectedfield=1") shouldBe 0
+
+      intercept[ORecordDuplicatedException] {
+        insert("jones", 456.0)
+      }
+
+//      val result = sqlCommand("""update StrictClass set name="bob" where name="jones" """).execute().asInstanceOf[java.lang.Integer].toInt
+//      result shouldBe 1
+//
+//      db.count(""" select count(*) from StrictClass where name="jones"  """) shouldBe 0
+//      db.count(""" select count(*) from StrictClass where name="bob"  """) shouldBe 1
+//
+//      sqlCommand(""" delete from StrictClass  """).execute()
+//      db.count("select count(*) from StrictClass") shouldBe 0
+
     }
 
     "DB access in futures" in {

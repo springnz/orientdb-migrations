@@ -9,19 +9,16 @@ import scala.util.Try
 
 trait OrientDocumentDBConnectionPool extends Logging {
 
-  def loadDBConfig: Option[DBConfig]
+  def loadDBConfig: Try[DBConfig]
 
-  lazy val pool: Option[OPartitionedDatabasePool] =
-    loadDBConfig.flatMap(createDatabasePool)
+  lazy val pool: Try[OPartitionedDatabasePool] =
+    loadDBConfig.flatMap(createDatabasePool).withErrorLog("Could not acquire db connection from pool")
 
-  def createDatabasePool(config: DBConfig): Option[OPartitionedDatabasePool] =
+  def createDatabasePool(config: DBConfig): Try[OPartitionedDatabasePool] =
     Try {
       new OPartitionedDatabasePool(config.host, config.user, config.pass)
-    }.withErrorLog("Could not create OPartitionedDatabasePool").toOption
+    }.withErrorLog("Could not create OPartitionedDatabasePool")
 
-  def acquire(): Option[ODatabaseDocumentTx] =
-    for {
-      p ← pool
-      db ← Try(p.acquire()).withErrorLog("Could not acquire db connection from pool").toOption
-    } yield db
+  def acquire(): Try[ODatabaseDocumentTx] =
+    pool.map(_.acquire()).withErrorLog("Could not acquire db connection from pool")
 }
