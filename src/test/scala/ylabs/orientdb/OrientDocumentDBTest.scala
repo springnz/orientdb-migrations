@@ -14,26 +14,24 @@ import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.util.Try
 
-class OrientDocumentDBTest
+abstract class OrientDocumentDBTest
     extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll with BeforeAndAfterEach
     with OrientDocumentDBScala {
 
-  implicit val db = new ODatabaseDocumentTx("memory:doctest")
-  db.create()
+  implicit val db: ODatabaseDocumentTx
 
-  override def beforeAll(): Unit = {
-  }
+  val classNames = List("User", "Person", "StrictClass", "TestClass")
 
-  override def afterAll() {
-    val classNames = List("User", "Person", "StrictClass", "TestClass")
+  def deleteAndDropClasses(): Unit = {
     classNames.foreach {
-      className ⇒ sqlCommand(s"delete from $className")
+      className ⇒
+        sqlCommand(s"delete from $className")(db)
+        Try {
+          dropClass(className)(db)
+        }
     }
-  }
-
-  override def afterEach(): Unit = {
-
   }
 
   def time[R](block: ⇒ R): R = {
@@ -46,7 +44,7 @@ class OrientDocumentDBTest
 
   "A strict class" should {
 
-    "work correctly" in new StrictClassFixture {
+    "be handled correctly" in new StrictClassFixture {
 
       Given("a strict class definition")
       val strictClass = createClass(className)
@@ -73,6 +71,7 @@ class OrientDocumentDBTest
       db.count(""" select count(*) from StrictClass where name="bob"  """) shouldBe 1
 
       And("the browseClass method should pick up the updated record")
+      db.commit()
       db.browseClass(className).begin().next().field(nameField).asInstanceOf[String] shouldBe "bob"
 
       When("all records are deleted")
@@ -107,6 +106,7 @@ class OrientDocumentDBTest
       doc.save()
     }
   }
+
   "Document DB" should {
 
     val userCount = 10000
@@ -160,11 +160,8 @@ class OrientDocumentDBTest
 
     "DB access in futures" in {
       val className = "TestClass"
-
       val f = dbFuture {
-        val testClass = createClass(className)
-        val doc = new ODocument()
-        doc.setClassName(className)
+        val doc = new ODocument(className)
         doc.field("id", 1)
         doc.save()
       }
