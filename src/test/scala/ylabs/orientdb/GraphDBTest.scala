@@ -11,15 +11,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import collection.mutable
 
 class GraphDBTest extends WordSpec with ShouldMatchers {
+  import OrientDBScala._
 
   // first need to run the following with console.sh:
   // CREATE DATABASE remote:localhost/graphtest root root plocal graph
-  lazy val graphFactory = new OrientGraphFactory("remote:localhost/graphtest")
+  // val graphFactory = new OrientGraphFactory("remote:localhost/graphtest")
   // val graphFactory = new OrientGraphFactory("plocal:target/databases/test" + math.random)
-  // val graphFactory = new OrientGraphFactory("memory:test")
-  lazy val graph = graphFactory.setupPool(1, 10)
+  val graphFactory = new OrientGraphFactory("memory:test")
+  val graph = graphFactory.setupPool(1, 10)
     // .getTx
-    .getNoTx
+  .getNoTx
 
   object Labels extends Enumeration {
     val Listing, User, Session, ViewListing, ViewNumber = Value
