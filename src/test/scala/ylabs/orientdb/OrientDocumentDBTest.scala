@@ -8,16 +8,15 @@ import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.storage.ORecordDuplicatedException
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
-import org.scalatest.{ BeforeAndAfterAll, GivenWhenThen, ShouldMatchers, WordSpec }
+import org.scalatest._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.util.Try
 
 class OrientDocumentDBTest
-    extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll
+    extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll with BeforeAndAfterEach
     with OrientDocumentDBScala {
 
   implicit val db = new ODatabaseDocumentTx("memory:doctest")
@@ -33,6 +32,10 @@ class OrientDocumentDBTest
     }
   }
 
+  override def afterEach(): Unit = {
+
+  }
+
   def time[R](block: ⇒ R): R = {
     val t0 = System.nanoTime()
     val result = block // call-by-name
@@ -41,6 +44,69 @@ class OrientDocumentDBTest
     result
   }
 
+  "A strict class" should {
+
+    "work correctly" in new StrictClassFixture {
+
+      Given("a strict class definition")
+      val strictClass = createClass(className)
+      strictClass.setStrictMode(true)
+      strictClass.createProperty(nameField, OType.STRING).setMandatory(true).createIndex(INDEX_TYPE.UNIQUE)
+      strictClass.createProperty(ageField, OType.INTEGER).setMandatory(true)
+
+      When("inserting duplicates")
+      insert("jones", 30)
+
+      Then("it should throw an exception")
+      intercept[ORecordDuplicatedException] {
+        insert("jones", 40)
+      }
+
+      When("updating a record")
+      val result = sqlCommand("""update StrictClass set name="bob" where name="jones" """).execute().asInstanceOf[java.lang.Integer].toInt
+
+      Then("it should return the number of updated rows")
+      result shouldBe 1
+
+      And("the record should be updated")
+      db.count(""" select count(*) from StrictClass where name="jones"  """) shouldBe 0
+      db.count(""" select count(*) from StrictClass where name="bob"  """) shouldBe 1
+
+      And("the browseClass method should pick up the updated record")
+      db.browseClass(className).begin().next().field(nameField).asInstanceOf[String] shouldBe "bob"
+
+      When("all records are deleted")
+      sqlCommand(""" delete from StrictClass  """).execute()
+
+      Then("the count should be zero")
+      db.count("select count(*) from StrictClass") shouldBe 0
+
+      Given("a record with a field not allowed by the schema")
+      val doc = new ODocument(className)
+      doc.field(nameField, "jimmy")
+      doc.field(ageField, 123)
+      doc.field("notAllowedBySchema", 1)
+
+      When("saving")
+      Then("it should throw an exception")
+      intercept[OValidationException] {
+        doc.save()
+      }
+    }
+  }
+
+  trait StrictClassFixture {
+    val className = "StrictClass"
+    val nameField = "name"
+    val ageField = "age"
+
+    def insert(name: String, age: Int): ODocument = {
+      val doc = new ODocument(className)
+      doc.field(nameField, name)
+      doc.field(ageField, age)
+      doc.save()
+    }
+  }
   "Document DB" should {
 
     val userCount = 10000
@@ -90,46 +156,6 @@ class OrientDocumentDBTest
         val count = db.countClass("User")
         assert(count === (userCount / 2))
       }
-    }
-
-    "Create, insert, update a schema-full class" in {
-      val strictClass = createClass("StrictClass")
-      strictClass.setStrictMode(true)
-      strictClass.createProperty("name", OType.STRING).setMandatory(true).createIndex(INDEX_TYPE.UNIQUE)
-      strictClass.createProperty("weight", OType.DOUBLE).setMandatory(true)
-
-      def insert(name: String, weight: Double): ODocument = {
-        val doc = new ODocument()
-        doc.setClassName("StrictClass")
-
-        doc.field("name", name)
-        doc.field("weight", weight)
-        doc.save()
-      }
-
-      val doc = insert("jones", 123.0)
-
-      intercept[OValidationException] {
-        doc.field("notAllowedBySchema", 1)
-        doc.save()
-      }
-
-      db.count("select count(*) from StrictClass") shouldBe 1
-      db.count("select count(*) from StrictClass where rejectedfield=1") shouldBe 0
-
-      intercept[ORecordDuplicatedException] {
-        insert("jones", 456.0)
-      }
-
-//      val result = sqlCommand("""update StrictClass set name="bob" where name="jones" """).execute().asInstanceOf[java.lang.Integer].toInt
-//      result shouldBe 1
-//
-//      db.count(""" select count(*) from StrictClass where name="jones"  """) shouldBe 0
-//      db.count(""" select count(*) from StrictClass where name="bob"  """) shouldBe 1
-//
-//      sqlCommand(""" delete from StrictClass  """).execute()
-//      db.count("select count(*) from StrictClass") shouldBe 0
-
     }
 
     "DB access in futures" in {
