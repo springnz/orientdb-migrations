@@ -7,7 +7,7 @@ import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
-import org.scalatest.{BeforeAndAfterAll, WordSpec, GivenWhenThen, ShouldMatchers}
+import org.scalatest.{ BeforeAndAfterAll, GivenWhenThen, ShouldMatchers, WordSpec }
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -18,14 +18,13 @@ class OrientDocumentDBTest
     extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll
     with OrientDocumentDBScala {
 
-  val db = new ODatabaseDocumentTx("memory:doctest")
+  implicit val db = new ODatabaseDocumentTx("memory:doctest")
   db.create()
 
   override def beforeAll(): Unit = {
   }
 
   override def afterAll() {
-    implicit val _db = db
     val classNames = List("User", "Person", "StrictClass", "TestClass")
     classNames.foreach {
       className ⇒
@@ -48,8 +47,7 @@ class OrientDocumentDBTest
 
     s"DB insert $userCount records" in {
       time {
-        implicit val _db = db
-        createIndex("User", "user", OType.STRING, INDEX_TYPE.UNIQUE)
+        createClass("User").createProperty("user", OType.STRING).createIndex(INDEX_TYPE.UNIQUE)
         db.declareIntent(new OIntentMassiveInsert())
         db.begin(TXTYPE.NOTX)
         var size = 0
@@ -95,13 +93,10 @@ class OrientDocumentDBTest
     }
 
     "Create a schema-full class" in {
-      implicit val _db = db
-      val schema = getSchema
-      val cat = createClass("StrictClass")
-      cat.setStrictMode(true)
-      createProperty(cat, "name", OType.STRING).setMandatory(true)
-      createProperty(cat, "weight", OType.DOUBLE).setMandatory(true)
-      schema.save()
+      val strictClass = createClass("StrictClass")
+      strictClass.setStrictMode(true)
+      strictClass.createProperty("name", OType.STRING).setMandatory(true).createIndex(INDEX_TYPE.UNIQUE)
+      strictClass.createProperty("weight", OType.DOUBLE).setMandatory(true)
 
       val doc = new ODocument()
       doc.setClassName("StrictClass")
@@ -119,11 +114,10 @@ class OrientDocumentDBTest
 
       // the following check fails due to the previously described error in OrientDB
       db.q[ODocument]("select * from StrictClass where rejectedfield=1").size shouldBe 0
+
     }
 
     "DB access in futures" in {
-      implicit val _db = db
-
       val className = "TestClass"
 
       val f = dbFuture {
