@@ -3,18 +3,14 @@ package ylabs.orientdb
 import com.orientechnologies.orient.core.command.OCommandRequest
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
-import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
-import com.orientechnologies.orient.core.metadata.schema.{ OClass, OType }
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.sql.OCommandSQL
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 import ylabs.util.Logging
-import ylabs.util.Pimpers._
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.Try
+import scala.concurrent.{ExecutionContext, Future}
 
 trait OrientDocumentDBScala extends Logging {
 
@@ -60,10 +56,12 @@ trait OrientDocumentDBScala extends Logging {
 
   def escapeSqlString(string: String) = string.replace("\\", "\\\\").replace("\"", "\\\"")
 
+  def selectClass[T](className: String)(mapper: ODocument ⇒ T): OrientDbSession[IndexedSeq[T]] =
+    OrientDbSession(_.q[ODocument](s"select from $className").map(mapper))
+
   def dbFuture[T](block: ⇒ T)(implicit db: ODatabaseDocumentTx, ec: ExecutionContext): Future[T] =
     Future {
       ODatabaseRecordThreadLocal.INSTANCE.set(db)
       block
     }
-
 }
