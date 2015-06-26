@@ -46,9 +46,7 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       gs.V(v.id).values[String]("key1", "key2").toList shouldBe List("value1", "value2")
     }
 
-    //TODO: this only works with remote graph, not in memory graph...
-    "support labels" in new RemoteGraphFixture {
-      // "using labels" in new Fixture {
+    "using labels" in new Fixture {
       val v1 = sg.addVertex("label1")
       val v2 = sg.addVertex("label2")
       val v3 = sg.addVertex()
