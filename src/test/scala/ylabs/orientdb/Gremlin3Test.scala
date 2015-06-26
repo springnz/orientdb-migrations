@@ -10,7 +10,7 @@ import org.scalatest.ShouldMatchers
 import collection.JavaConversions._
 import concurrent.ExecutionContext.Implicits.global
 import collection.mutable
-import org.apache.tinkerpop.gremlin.orientdb.structure._
+import org.apache.tinkerpop.gremlin.orientdb._
 import gremlin.scala._
 import java.util.{ ArrayList ⇒ JArrayList }
 
