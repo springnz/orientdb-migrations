@@ -59,6 +59,20 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
     }
   }
 
+  "edges" should {
+    "be found if they exist" in new Fixture {
+      val v1 = sg.addVertex()
+      val v2 = sg.addVertex()
+
+      v1.addEdge("label1", v2)
+      // val list = gs.V(v1.id, v3.id).toList
+      // list should have length 2
+    }
+
+    //TODO: support properties
+  }
+
+
   "execute arbitrary orient-SQL" in new Fixture {
     (1 to 20) foreach { _ ⇒
       sg.addVertex()
