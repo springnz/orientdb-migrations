@@ -21,8 +21,9 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       val v1 = sg.addVertex()
       val v2 = sg.addVertex()
       val v3 = sg.addVertex()
-      val list = gs.V(v1.id, v3.id).toList
-      list should have length 2
+
+      gs.V(v1.id, v3.id).toList should have length 2
+      gs.V().toList should have length 3
     }
 
     "not be found if they don't exist" in new Fixture {
@@ -66,8 +67,8 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       val e1 = v1.addEdge("label1", v2)
       val e2 = v2.addEdge("label2", v1)
 
-      val list = gs.E(e2.id).toList
-      list should have length 1
+      gs.E(e2.id).toList should have length 1
+      gs.E().toList should have length 2
     }
 
     "not be found if they don't exist" in new Fixture {
@@ -86,6 +87,16 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       e.property[String](key).value shouldBe "testValue1"
       gs.E(e.id).values(key).toList shouldBe List("testValue1")
     }
+
+    "set property during creation" in new Fixture {
+      val v1 = sg.addVertex()
+      val v2 = sg.addVertex()
+      val property1 = "key1" → "value1"
+      val property2 = "key2" → "value2"
+      val e = v1.addEdge("label1", v2, Map(property1, property2))
+      gs.E(e.id).values[String]("key1", "key2").toList shouldBe List("value1", "value2")
+    }
+
   }
 
   "execute arbitrary orient-SQL" in new Fixture {
