@@ -63,13 +63,13 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
     "be found if they exist" in new Fixture {
       val v1 = sg.addVertex()
       val v2 = sg.addVertex()
+      val e1 = v1.addEdge("label1", v2)
+      val e2 = v2.addEdge("label2", v1)
 
-      v1.addEdge("label1", v2)
-      // val list = gs.V(v1.id, v3.id).toList
-      // list should have length 2
+      val list = gs.E(e2.id).toList
+      list should have length 1
     }
 
-    //TODO: support properties
   }
 
 
