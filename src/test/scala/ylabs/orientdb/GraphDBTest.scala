@@ -10,7 +10,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import collection.mutable
 
 class GraphDBTest extends WordSpec with ShouldMatchers {
-  import OrientDBScala._
 
   // first need to run the following with console.sh:
   // CREATE DATABASE remote:localhost/graphtest root root plocal graph

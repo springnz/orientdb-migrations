@@ -10,7 +10,7 @@ import ylabs.util.Logging
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait OrientDocumentDBScala extends Logging {
 
@@ -56,8 +56,8 @@ trait OrientDocumentDBScala extends Logging {
 
   def escapeSqlString(string: String) = string.replace("\\", "\\\\").replace("\"", "\\\"")
 
-  def selectClass[T](className: String)(mapper: ODocument ⇒ T): OrientDbSession[IndexedSeq[T]] =
-    OrientDbSession(_.q[ODocument](s"select from $className").map(mapper))
+  def selectClass[T](className: String)(mapper: ODocument ⇒ T)(implicit db: ODatabaseDocumentTx): IndexedSeq[T] =
+    db.q[ODocument](s"select from $className").map(mapper)
 
   def dbFuture[T](block: ⇒ T)(implicit db: ODatabaseDocumentTx, ec: ExecutionContext): Future[T] =
     Future {
