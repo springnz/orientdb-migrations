@@ -1,12 +1,16 @@
 name := "OrientDBScala"
 organization := "ylabs"
-version := "0.1"
 scalaVersion := "2.11.7"
 // val orientCommonsVersion = "2.0-M1"
 val orientDBVersion = "2.1-rc4"
-//val orientDBVersion = "2.0.11"
 
-resolvers ++= Seq("Orient Technologies Maven2 Repository" at "http://www.orientechnologies.com/listing/m2")
+val repo = "https://nexus.prod.corp/content"
+
+resolvers ++= Seq(
+  "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
+  "spring" at s"$repo/groups/public",
+  "Orient Technologies Maven2 Repository" at "http://www.orientechnologies.com/listing/m2"
+)
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.4",
@@ -20,3 +24,12 @@ libraryDependencies ++= Seq(
 )
 
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oD")
+
+publishTo <<= version { (v: String) ⇒
+  if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at s"$repo/repositories/snapshots")
+  else Some("releases" at s"$repo/repositories/releases")
+}
+
+releaseSettings
+ReleaseKeys.versionBump := sbtrelease.Version.Bump.Minor
+ReleaseKeys.tagName := s"${name.value}-v${version.value}"
