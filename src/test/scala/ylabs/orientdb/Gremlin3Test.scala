@@ -96,7 +96,22 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       val e = v1.addEdge("label1", v2, Map(property1, property2))
       gs.E(e.id).values[String]("key1", "key2").toList shouldBe List("value1", "value2")
     }
+  }
 
+  "traversals" should {
+    "follow outE" taggedAs org.scalatest.Tag("foo") in new TinkerpopFixture {
+      val traversal = gs.V(marko.id).outE
+      traversal.toList.foreach(println)
+    }
+
+    // "follow out vertices" taggedAs org.scalatest.Tag("foo") in new SampleGraphFixture {
+    //   val traversal = gs.V(v1.id).out
+    //   traversal.toList.foreach(println)
+    // }
+
+    //TODO: inV
+    //TODO: in
+    //TODO: filter on labels
   }
 
   "execute arbitrary orient-SQL" in new Fixture {
@@ -117,6 +132,26 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
     val graph = new OrientGraphFactory(s"memory:test-${math.random}").getTx()
     val gs = GremlinScala(graph)
     val sg = ScalaGraph(graph)
+  }
+
+  trait TinkerpopFixture {
+    // val graph = new OrientGraphFactory("remote:localhost/graphtest", "root", "root").getTx()
+    val graph = new OrientGraphFactory(s"memory:test-${math.random}").getTx()
+    val gs = GremlinScala(graph)
+    val sg = ScalaGraph(graph)
+
+    val marko = sg.addVertex("person", Map("name" -> "marko", "age" -> 29))
+    val vadas = sg.addVertex("person", Map("name" -> "vadas", "age" -> 27))
+    val lop = sg.addVertex("software", Map("name" -> "lop", "lang" -> "java"))
+    val josh = sg.addVertex("person", Map("name" -> "josh", "age" -> 32))
+    val ripple = sg.addVertex("software", Map("name" -> "ripple", "lang" -> "java"))
+    val peter = sg.addVertex("person", Map("name" -> "peter", "age" -> 35))
+    marko.addEdge("knows", vadas, Map("weight" -> 0.5d))
+    marko.addEdge("knows", josh, Map("weight" -> 1.0d))
+    marko.addEdge("created", lop, Map("weight" -> 0.4d))
+    josh.addEdge("created", ripple, Map("weight" -> 1.0d))
+    josh.addEdge("created", lop, Map("weight" -> 0.4d))
+    peter.addEdge("created", lop, Map("weight" -> 0.2d))
   }
 
   trait RemoteGraphFixture {
