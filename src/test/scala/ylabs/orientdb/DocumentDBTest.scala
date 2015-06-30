@@ -46,7 +46,7 @@ trait DocumentDBTest
 
   "A strict class" should {
 
-    "work correctly" taggedAs tag in new StrictClassFixture {
+    "work correctly" taggedAs defaultTestTag in new StrictClassFixture {
       implicit val db = pool.acquire().get
 
       Given("a strict class definition")
@@ -118,7 +118,7 @@ trait DocumentDBTest
     val className = "User"
     val fieldName = "name"
 
-    s"DB insert $userCount records" taggedAs tag in {
+    s"DB insert $userCount records" taggedAs defaultTestTag in {
       implicit val db = pool.acquire().get
       time {
         createClass(className).createProperty(fieldName, OType.STRING).createIndex(INDEX_TYPE.UNIQUE)
@@ -144,7 +144,7 @@ trait DocumentDBTest
       db.close()
     }
 
-    "DB Search" taggedAs tag in {
+    "DB Search" taggedAs defaultTestTag in {
       implicit val db = pool.acquire().get
       time {
         val result = db.q[ODocument](s"select $fieldName from $className where $fieldName = ?", "user10")
@@ -153,7 +153,7 @@ trait DocumentDBTest
       db.close()
     }
 
-    "DB select all" taggedAs tag in {
+    "DB select all" taggedAs defaultTestTag in {
       implicit val db = pool.acquire().get
       time {
         val result = db.q[ODocument]("select * from User")
@@ -162,7 +162,7 @@ trait DocumentDBTest
       db.close()
     }
 
-    s"DB delete ${userCount / 2} records" taggedAs tag in {
+    s"DB delete ${userCount / 2} records" taggedAs defaultTestTag in {
       implicit val db = pool.acquire().get
       time {
         db.browseClass("User").iterator.asScala.take(userCount / 2).foreach(_.delete())
@@ -174,7 +174,7 @@ trait DocumentDBTest
   }
 
   "Works with JSON" should {
-    "Insert JSON" taggedAs tag in new JsonFixture {
+    "Insert JSON" taggedAs defaultTestTag in new JsonFixture {
       implicit val db = pool.acquire().get
       val doc = new ODocument("Person")
       doc.fromJSON(json)
@@ -184,7 +184,7 @@ trait DocumentDBTest
       db.close()
     }
 
-    "Search JSON" taggedAs tag in new JsonFixture {
+    "Search JSON" taggedAs defaultTestTag in new JsonFixture {
       implicit val db = pool.acquire().get
       val doc = new ODocument("Person")
       doc.fromJSON(json)
