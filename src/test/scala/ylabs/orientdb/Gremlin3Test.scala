@@ -1,18 +1,12 @@
 package ylabs.orientdb
 
-import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
-import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.sql.query.OResultSet
-import com.orientechnologies.orient.core.iterator.ORecordIteratorClass
-import com.orientechnologies.orient.core.record.ORecord
-import org.scalatest.WordSpec
-import org.scalatest.ShouldMatchers
-import collection.JavaConversions._
-import concurrent.ExecutionContext.Implicits.global
-import collection.mutable
-import org.apache.tinkerpop.gremlin.orientdb._
 import gremlin.scala._
-import java.util.{ ArrayList ⇒ JArrayList }
+import java.util.{ArrayList => JArrayList}
+import org.apache.tinkerpop.gremlin.orientdb._
+import org.scalatest.{ShouldMatchers, WordSpec}
+import scala.collection.JavaConversions._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class Gremlin3Test extends WordSpec with ShouldMatchers {
 
@@ -101,32 +95,52 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
   "traversals" should {
     "follow outE" in new TinkerpopFixture {
       def traversal = gs.V(marko.id).outE
-      traversal.toList should have size 3
-      traversal.label.toSet should have size 2
+      traversal.label.toSet shouldBe Set("knows", "created")
+      traversal.label.toList should have size 3
     }
 
     "follow outE for a label" in new TinkerpopFixture {
       def traversal = gs.V(marko.id).outE("knows")
-      traversal.toList should have size 2
-      traversal.label.toSet should have size 1
+      traversal.label.toSet shouldBe Set("knows")
+      traversal.label.toList should have size 2
     }
 
     "follow inV" in new TinkerpopFixture {
       def traversal = gs.V(marko.id).outE.inV
-      traversal.toList should have size 3
-      traversal.label.toSet should have size 2
+      traversal.value[String]("name").toSet shouldBe Set("vadas", "josh", "lop")
     }
 
-    // "follow out vertices" taggedAs org.scalatest.Tag("foo") in new SampleGraphFixture {
-    //   val traversal = gs.V(v1.id).out
-    // }
+    "follow out" in new TinkerpopFixture {
+      def traversal = gs.V(marko.id).out
+      traversal.value[String]("name").toSet shouldBe Set("vadas", "josh", "lop")
+    }
 
-    // traversal.toList.foreach(println)
-    // TODO: in
-    // TODO: in for a label
-    // TODO: bothE
-    // TODO: both
-    // TODO: other traversals
+    "follow out for a label" in new TinkerpopFixture {
+      def traversal = gs.V(marko.id).out("knows")
+      traversal.value[String]("name").toSet shouldBe Set("vadas", "josh")
+    }
+
+    "follow in" in new TinkerpopFixture {
+      def traversal = gs.V(josh.id).in
+      traversal.value[String]("name").toSet shouldBe Set("marko")
+    }
+
+    "follow inE" in new TinkerpopFixture {
+      def traversal = gs.V(josh.id).inE
+      traversal.label.toSet shouldBe Set("knows")
+    }
+
+    "filter" taggedAs(org.scalatest.Tag("foo")) in new TinkerpopFixture {
+      // TODO: currently broken - numberformatexception
+      def traversal = gs.V(marko).out.value[Int]("age")//.filter(_.value[Int]
+        traversal.toList foreach println
+    }
+
+    "properties" taggedAs(org.scalatest.Tag("foo")) in new TinkerpopFixture {
+      // TODO: currently broken - numberformatexception
+      def traversal = gs.V(marko).out.properties("age")
+      traversal.toList foreach println
+    }
   }
 
   "execute arbitrary OrientSQL" in new Fixture {
