@@ -14,7 +14,7 @@ import ylabs.util.Pimpers._
 import scala.collection.JavaConverters._
 import scala.util.Try
 
-trait OrientDocumentDBTest
+trait DocumentDBTest
     extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll with BeforeAndAfterEach
     with OrientDocumentDBScala with ODBTestBase {
 

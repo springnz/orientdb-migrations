@@ -5,6 +5,7 @@ import com.tinkerpop.blueprints.TransactionalGraph.Conclusion
 import com.tinkerpop.blueprints.impls.orient._
 import org.scalatest.WordSpec
 import org.scalatest.ShouldMatchers
+import ylabs.orientdb.test.ODBRemoteTestTag
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import collection.mutable
@@ -52,7 +53,7 @@ class GraphDBTest extends WordSpec with ShouldMatchers {
     }
 
   "tinkerpop api" should {
-    "create scenario graph" in {
+    "create scenario graph" taggedAs ODBRemoteTestTag in {
       println("starting to delete the existing elements")
       graph.getEdges.asScala.foreach(_.remove())
       graph.getVertices.asScala.foreach(_.remove())
