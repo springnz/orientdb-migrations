@@ -99,22 +99,37 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
   }
 
   "traversals" should {
-    "follow outE" taggedAs org.scalatest.Tag("foo") in new TinkerpopFixture {
-      val traversal = gs.V(marko.id).outE
-      traversal.toList.foreach(println)
+    "follow outE" in new TinkerpopFixture {
+      def traversal = gs.V(marko.id).outE
+      traversal.toList should have size 3
+      traversal.label.toSet should have size 2
+    }
+
+    "follow outE for a label" in new TinkerpopFixture {
+      def traversal = gs.V(marko.id).outE("knows")
+      traversal.toList should have size 2
+      traversal.label.toSet should have size 1
+    }
+
+    "follow inV" in new TinkerpopFixture {
+      def traversal = gs.V(marko.id).outE.inV
+      traversal.toList should have size 3
+      traversal.label.toSet should have size 2
     }
 
     // "follow out vertices" taggedAs org.scalatest.Tag("foo") in new SampleGraphFixture {
     //   val traversal = gs.V(v1.id).out
-    //   traversal.toList.foreach(println)
     // }
 
-    //TODO: inV
-    //TODO: in
-    //TODO: filter on labels
+    // traversal.toList.foreach(println)
+    // TODO: in
+    // TODO: in for a label
+    // TODO: bothE
+    // TODO: both
+    // TODO: other traversals
   }
 
-  "execute arbitrary orient-SQL" in new Fixture {
+  "execute arbitrary OrientSQL" in new Fixture {
     (1 to 20) foreach { _ ⇒
       sg.addVertex()
     }
