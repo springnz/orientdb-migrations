@@ -3,6 +3,7 @@ package ylabs.orientdb
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import org.scalatest.WordSpec
 import org.scalatest.ShouldMatchers
+import ylabs.orientdb.test.ODBLoadTestTag
 import collection.JavaConversions._
 import concurrent.ExecutionContext.Implicits.global
 import collection.mutable
@@ -16,10 +17,10 @@ class GraphLoadTest extends WordSpec with ShouldMatchers {
   // CREATE DATABASE remote:localhost/graphtest root root plocal graph
 
   val path = s"graphtest-${math.random}".substring(0, 20)
-  val graphFactory = new OrientGraphFactory(s"plocal:target/$path")
+  lazy val graphFactory = new OrientGraphFactory(s"plocal:target/$path")
   // val graphFactory = new OrientGraphFactory("memory:test")
   // val graphFactory = new OrientGraphFactory("remote:localhost/graphtest")
-  val graph = graphFactory.setupPool(1, 10)
+  lazy val graph = graphFactory.setupPool(1, 10)
     // .getTx
     .getNoTx
 
@@ -80,7 +81,7 @@ class GraphLoadTest extends WordSpec with ShouldMatchers {
     }
 
   "tinkerpop api" should {
-    "create scenario graph" in {
+    "create scenario graph" taggedAs ODBLoadTestTag in {
       println("starting to delete the existing elements")
       graph.getEdges.foreach(_.remove())
       graph.getVertices.foreach(_.remove())

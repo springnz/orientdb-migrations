@@ -14,12 +14,12 @@ class GraphDBTest extends WordSpec with ShouldMatchers {
 
   // first need to run the following with console.sh:
   // CREATE DATABASE remote:localhost/graphtest root root plocal graph
-  val graphFactory = new OrientGraphFactory("remote:localhost/graphtest")
+  lazy val graphFactory = new OrientGraphFactory("remote:localhost/graphtest")
   // val graphFactory = new OrientGraphFactory("plocal:target/databases/test" + math.random)
   // val graphFactory = new OrientGraphFactory("memory:test")
-  val graph = graphFactory.setupPool(1, 10)
+  lazy val graph = graphFactory.setupPool(1, 10)
     // .getTx
-  .getNoTx
+    .getNoTx
 
   object Labels extends Enumeration {
     val Listing, User, Session, ViewListing, ViewNumber = Value
@@ -76,7 +76,6 @@ class GraphDBTest extends WordSpec with ShouldMatchers {
 
       println("vertex count: " + graph.getVertices.asScala.size)
       println("edge count: " + graph.getEdges.asScala.size)
-
 
       // println(graph.getVertices)
       // val a: OrientVertex = ???
