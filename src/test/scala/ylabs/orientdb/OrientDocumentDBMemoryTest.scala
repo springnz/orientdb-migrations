@@ -1,11 +1,14 @@
 package ylabs.orientdb
 
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
-
 class OrientDocumentDBMemoryTest extends OrientDocumentDBTest {
-  override val db = new ODatabaseDocumentTx("memory:doctest")
-  db.create()
+
+  override def dbConfig = DBConfig("memory:doctest", "admin", "admin")
+
+  def createDatabase(): Unit = OrientDbSession(_.create()).run()
+
+  override def beforeAll(): Unit = {
+    createDatabase()
+    super.beforeAll()
+  }
 }
-
-
 
