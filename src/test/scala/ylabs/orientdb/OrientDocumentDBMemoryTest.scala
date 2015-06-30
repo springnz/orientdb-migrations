@@ -1,14 +1,6 @@
 package ylabs.orientdb
 
-class OrientDocumentDBMemoryTest extends OrientDocumentDBTest {
+import ylabs.orientdb.test.ODBMemoryTest
 
-  override def dbConfig = DBConfig("memory:doctest", "admin", "admin")
-
-  def createDatabase(): Unit = OrientDbSession(_.create()).run()
-
-  override def beforeAll(): Unit = {
-    createDatabase()
-    super.beforeAll()
-  }
-}
+class OrientDocumentDBMemoryTest extends OrientDocumentDBTest with ODBMemoryTest
 

@@ -8,23 +8,17 @@ import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.storage.ORecordDuplicatedException
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import org.scalatest._
+import ylabs.orientdb.test.ODBTestBase
 import ylabs.util.Pimpers._
 
 import scala.collection.JavaConverters._
-import scala.util.{ Success, Try }
+import scala.util.Try
 
-abstract class OrientDocumentDBTest
+trait OrientDocumentDBTest
     extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll with BeforeAndAfterEach
-    with OrientDocumentDBScala {
+    with OrientDocumentDBScala with ODBTestBase {
 
-  def dbConfig: DBConfig
-
-  implicit val pool = new OrientDocumentDBConnectionPool {
-    override def loadDBConfig: Try[DBConfig] = {
-      log.info(s"Loading $dbConfig")
-      Success(dbConfig)
-    }
-  }
+  val dbName = "document-db-test"
 
   val classNames = List("User", "Person", "StrictClass", "TestClass")
 
@@ -52,7 +46,7 @@ abstract class OrientDocumentDBTest
 
   "A strict class" should {
 
-    "work correctly" in new StrictClassFixture {
+    "work correctly" taggedAs tag in new StrictClassFixture {
       implicit val db = pool.acquire().get
 
       Given("a strict class definition")
@@ -70,7 +64,8 @@ abstract class OrientDocumentDBTest
       }
 
       When("updating a record")
-      val result = sqlCommand("""update StrictClass set name="bob" where name="jones" """).execute().asInstanceOf[java.lang.Integer].toInt
+      val result = sqlCommand("""update StrictClass set name="bob" where name="jones" """)
+        .execute().asInstanceOf[java.lang.Integer].toInt
 
       Then("it should return the number of updated rows")
       result shouldBe 1
@@ -123,7 +118,7 @@ abstract class OrientDocumentDBTest
     val className = "User"
     val fieldName = "name"
 
-    s"DB insert $userCount records" in {
+    s"DB insert $userCount records" taggedAs tag in {
       implicit val db = pool.acquire().get
       time {
         createClass(className).createProperty(fieldName, OType.STRING).createIndex(INDEX_TYPE.UNIQUE)
@@ -149,7 +144,7 @@ abstract class OrientDocumentDBTest
       db.close()
     }
 
-    "DB Search" in {
+    "DB Search" taggedAs tag in {
       implicit val db = pool.acquire().get
       time {
         val result = db.q[ODocument](s"select $fieldName from $className where $fieldName = ?", "user10")
@@ -158,7 +153,7 @@ abstract class OrientDocumentDBTest
       db.close()
     }
 
-    "DB select all" in {
+    "DB select all" taggedAs tag in {
       implicit val db = pool.acquire().get
       time {
         val result = db.q[ODocument]("select * from User")
@@ -167,7 +162,7 @@ abstract class OrientDocumentDBTest
       db.close()
     }
 
-    s"DB delete ${userCount / 2} records" in {
+    s"DB delete ${userCount / 2} records" taggedAs tag in {
       implicit val db = pool.acquire().get
       time {
         db.browseClass("User").iterator.asScala.take(userCount / 2).foreach(_.delete())
@@ -179,7 +174,7 @@ abstract class OrientDocumentDBTest
   }
 
   "Works with JSON" should {
-    "Insert JSON" in new JsonFixture {
+    "Insert JSON" taggedAs tag in new JsonFixture {
       implicit val db = pool.acquire().get
       val doc = new ODocument("Person")
       doc.fromJSON(json)
@@ -189,7 +184,7 @@ abstract class OrientDocumentDBTest
       db.close()
     }
 
-    "Search JSON" in new JsonFixture {
+    "Search JSON" taggedAs tag in new JsonFixture {
       implicit val db = pool.acquire().get
       val doc = new ODocument("Person")
       doc.fromJSON(json)

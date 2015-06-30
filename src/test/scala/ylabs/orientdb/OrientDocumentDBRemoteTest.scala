@@ -1,7 +1,5 @@
 package ylabs.orientdb
 
-class OrientDocumentDBRemoteTest extends OrientDocumentDBTest {
+import ylabs.orientdb.test.ODBRemoteTest
 
-  override def dbConfig = DBConfig("remote:localhost/test", "admin", "admin")
-
-}
+class OrientDocumentDBRemoteTest extends OrientDocumentDBTest with ODBRemoteTest
