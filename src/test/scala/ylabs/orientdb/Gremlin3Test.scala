@@ -6,7 +6,6 @@ import java.util.{ArrayList => JArrayList}
 import org.apache.tinkerpop.gremlin.orientdb._
 import org.scalatest.{ShouldMatchers, WordSpec}
 import scala.collection.JavaConversions._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class Gremlin3Test extends WordSpec with ShouldMatchers {
 
