@@ -1,26 +1,23 @@
 name := "OrientDBScala"
+version := "0.1"
 organization := "ylabs"
 scalaVersion := "2.11.7"
 // val orientCommonsVersion = "2.0-M1"
 val orientDBVersion = "2.1-rc4"
 
-val repo = "https://nexus.prod.corp/content"
-
 resolvers ++= Seq(
-  "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
-  "spring" at s"$repo/groups/public",
-  "Orient Technologies Maven2 Repository" at "http://www.orientechnologies.com/listing/m2"
-)
+  Resolver.mavenLocal,
+  "Orient Technologies Maven2 Repository" at "http://www.orientechnologies.com/listing/m2")
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "2.2.4",
-  // "com.orientechnologies" % "orient-commons" % orientCommonsVersion withSources(),
+  "org.scalatest" %% "scalatest" % "2.2.4" % Test,
   "com.orientechnologies" % "orientdb-core" % orientDBVersion withSources(),
   "com.orientechnologies" % "orientdb-graphdb" % orientDBVersion withSources(),
   "com.orientechnologies" % "orientdb-client" % orientDBVersion withSources(),
-  // "com.orientechnologies" % "orientdb-enterprise" % orientDBVersion withSources(),
-  "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0",
-  "ch.qos.logback" % "logback-classic" % "1.1.3" % Compile withSources()
+  "com.michaelpollmeier" %% "gremlin-scala" % "3.0.0.M9-incubating",
+  "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M1"
+    // "com.orientechnologies" % "orientdb-enterprise" % orientDBVersion withSources(),
+    // "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0"
 )
 
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oD")
