@@ -2,7 +2,8 @@ package ylabs.util
 
 import org.slf4j.Logger
 
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success, Try }
 
 object Pimpers {
 
@@ -22,6 +23,13 @@ object Pimpers {
         case Failure(e) ⇒
           block
           Failure(e)
+      }
+  }
+
+  implicit class FuturePimper[T](f: Future[T]) {
+    def withErrorLog(msg: String)(implicit log: Logger, ec: ExecutionContext) =
+      f.onFailure {
+        case e ⇒ log.error(msg, e)
       }
   }
 }
