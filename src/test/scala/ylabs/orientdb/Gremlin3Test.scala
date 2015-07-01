@@ -130,16 +130,27 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       traversal.label.toSet shouldBe Set("knows")
     }
 
-    "filter" taggedAs(org.scalatest.Tag("foo")) in new TinkerpopFixture {
-      // TODO: currently broken - numberformatexception
-      def traversal = gs.V(marko).out.value[Int]("age")//.filter(_.value[Int]
-        traversal.toList foreach println
+    "value" in new TinkerpopFixture {
+      def traversal = gs.V(marko.id).out.value[Int]("age")//.filter(_.value[Int]
+      traversal.toSet shouldBe Set(27, 32)
     }
 
-    "properties" taggedAs(org.scalatest.Tag("foo")) in new TinkerpopFixture {
-      // TODO: currently broken - numberformatexception
-      def traversal = gs.V(marko).out.properties("age")
-      traversal.toList foreach println
+    "properties" in new TinkerpopFixture {
+      def traversal = gs.V(marko.id).out.properties("age")
+      traversal.toSet.map(_.value) shouldBe Set(27, 32)
+    }
+
+    "filter" taggedAs(org.scalatest.Tag("foo")) in new TinkerpopFixture {
+      def traversal = gs.V(marko.id).out.filter(_.property[Int]("age").orElse(0) > 30)
+      traversal.value[String]("name").toSet shouldBe Set("josh")
+    }
+
+    "blub" taggedAs(org.scalatest.Tag("foo")) in new TinkerpopFixture {
+      // println(Foo.a)
+      // println(Foo)
+      // TODO: remove
+      // def traversal = gs.V(marko.id).id
+      // traversal.toList foreach println
     }
   }
 
@@ -189,5 +200,4 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
     val gs = GremlinScala(graph)
     val sg = ScalaGraph(graph)
   }
-
 }
