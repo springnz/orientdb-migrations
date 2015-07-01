@@ -8,6 +8,6 @@ trait ODBRemoteTest extends ODBTestBase {
 
   def dbConfig = DBConfig(s"remote:localhost/$dbName", "admin", "admin")
 
-  def defaultTestTag = ODBRemoteTestTag
+  def dbTestTag = ODBRemoteTestTag
 
 }

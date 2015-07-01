@@ -16,7 +16,7 @@ trait ODBTestBase {
 
   def dbConfig: DBConfig
 
-  def defaultTestTag: Tag
+  def dbTestTag: Tag
 
   val dbName: String
 }

@@ -8,7 +8,7 @@ trait ODBMemoryTest extends ODBTestBase {
 
   def dbConfig = DBConfig(s"memory:$dbName", "admin", "admin")
 
-  def defaultTestTag = ODBMemoryTestTag
+  def dbTestTag = ODBMemoryTestTag
 
   OrientDbSession(_.create()).run()
 
