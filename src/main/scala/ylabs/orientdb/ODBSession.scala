@@ -6,7 +6,7 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.util.{ Failure, Success, Try }
 
-class OrientDbSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
+class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
 
   def run()(implicit dbConnectionPool: OrientDocumentDBConnectionPool): Try[A] =
     dbConnectionPool
@@ -67,15 +67,15 @@ class OrientDbSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
     if (!db.isClosed) db.close()
 
   // todo scalaZ ? todo verify ?
-  def map[B](fn: A ⇒ B): OrientDbSession[B] =
-    flatMap(a ⇒ new OrientDbSession[B](db ⇒ fn(a)))
+  def map[B](fn: A ⇒ B): ODBSession[B] =
+    flatMap(a ⇒ new ODBSession[B](db ⇒ fn(a)))
 
-  def flatMap[B](fn: A ⇒ OrientDbSession[B]): OrientDbSession[B] = {
-    new OrientDbSession[B](db ⇒ fn(block(db)).block(db))
+  def flatMap[B](fn: A ⇒ ODBSession[B]): ODBSession[B] = {
+    new ODBSession[B](db ⇒ fn(block(db)).block(db))
   }
 }
 
-object OrientDbSession {
-  def apply[A](block: ODatabaseDocumentTx ⇒ A): OrientDbSession[A] = new OrientDbSession[A](block)
-  def map2[A, B, C](a: OrientDbSession[A], b: OrientDbSession[B])(f: (A, B) ⇒ C): OrientDbSession[C] = ??? // todo...just use scalaz
+object ODBSession {
+  def apply[A](block: ODatabaseDocumentTx ⇒ A): ODBSession[A] = new ODBSession[A](block)
+  def map2[A, B, C](a: ODBSession[A], b: ODBSession[B])(f: (A, B) ⇒ C): ODBSession[C] = ??? // todo...just use scalaz
 }

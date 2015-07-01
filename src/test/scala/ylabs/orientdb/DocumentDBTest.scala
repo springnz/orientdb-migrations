@@ -22,11 +22,11 @@ trait DocumentDBTest
 
   val classNames = List("User", "Person", "StrictClass", "TestClass")
 
-  def dropClasses(): Unit = OrientDbSession { implicit db ⇒
+  def dropClasses(): Unit = ODBSession { implicit db ⇒
     classNames.foreach(className ⇒ Try { dropClass(className) })
   }.run().withErrorLog("failed to drop classes")
 
-  def deleteClassRecords(): Unit = OrientDbSession { implicit db ⇒
+  def deleteClassRecords(): Unit = ODBSession { implicit db ⇒
     classNames.foreach { className ⇒
       Try { sqlCommand(s"delete from $className").execute().asInstanceOf[java.lang.Integer] }
     }

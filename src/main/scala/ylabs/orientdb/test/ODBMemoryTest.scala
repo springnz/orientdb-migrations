@@ -1,6 +1,6 @@
 package ylabs.orientdb.test
 
-import ylabs.orientdb.{DBConfig, OrientDbSession}
+import ylabs.orientdb.{DBConfig, ODBSession}
 
 trait ODBMemoryTest extends ODBTestBase {
 
@@ -10,6 +10,6 @@ trait ODBMemoryTest extends ODBTestBase {
 
   def dbTestTag = ODBMemoryTestTag
 
-  OrientDbSession(_.create()).run()
+  ODBSession(_.create()).run()
 
 }

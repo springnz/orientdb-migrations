@@ -15,14 +15,14 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
 import scala.util.{Try, _}
 
-class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfterAll with OrientDocumentDBScala {
+class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfterAll with OrientDocumentDBScala {
 
   val random = scala.util.Random
   implicit val ec = ExecutionContext.global
 
   "map" should {
     "work in simple case" in new Fixture {
-      val session = OrientDbSession { _ ⇒ 1 }
+      val session = ODBSession { _ ⇒ 1 }
       val mapped = session.map(_ * 2)
       val future = mapped.runAsync()(pool, ec)
 
@@ -46,9 +46,9 @@ class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAn
 
   "flatMap" should {
   "work properly" in new Fixture {
-      val start = OrientDbSession { _ ⇒ 1 }
+      val start = ODBSession { _ ⇒ 1 }
 
-      def doSomething(x: Int) = OrientDbSession { _ ⇒ x + 10 }
+      def doSomething(x: Int) = ODBSession { _ ⇒ x + 10 }
 
       val session = for {
         x ← start
@@ -63,8 +63,8 @@ class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAn
     // todo: scalacheck ? we verify that it's monad only for number 5 :-)
     "have left identity" in new Fixture {
       val number = random.nextInt
-      val unit: Int ⇒ OrientDbSession[Int] = x ⇒ OrientDbSession { _ ⇒ x }
-      val f: Int ⇒ OrientDbSession[Int] = z ⇒ OrientDbSession { _ ⇒ z * 2 }
+      val unit: Int ⇒ ODBSession[Int] = x ⇒ ODBSession { _ ⇒ x }
+      val f: Int ⇒ ODBSession[Int] = z ⇒ ODBSession { _ ⇒ z * 2 }
 
       val left = unit(number).flatMap(f)
       val right = f(number)
@@ -78,9 +78,9 @@ class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAn
 
     "have right identity" in new Fixture {
       val number = random.nextInt
-      val unit: Int ⇒ OrientDbSession[Int] = x ⇒ OrientDbSession { _ ⇒ x }
+      val unit: Int ⇒ ODBSession[Int] = x ⇒ ODBSession { _ ⇒ x }
 
-      val m = OrientDbSession { _ ⇒ number }
+      val m = ODBSession { _ ⇒ number }
       val left = m.flatMap(unit)
       val right = m
 
@@ -93,9 +93,9 @@ class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAn
 
     "be associative" in new Fixture {
       val number = random.nextInt(10000)
-      val f: Int ⇒ OrientDbSession[Int] = z ⇒ OrientDbSession { _ ⇒ z * 2 }
-      val g: Int ⇒ OrientDbSession[Int] = z ⇒ OrientDbSession { _ ⇒ z - 100 }
-      val m = OrientDbSession { _ ⇒ number }
+      val f: Int ⇒ ODBSession[Int] = z ⇒ ODBSession { _ ⇒ z * 2 }
+      val g: Int ⇒ ODBSession[Int] = z ⇒ ODBSession { _ ⇒ z - 100 }
+      val m = ODBSession { _ ⇒ number }
 
       val left = m.flatMap(f).flatMap(g)
       val right = m.flatMap(x ⇒ f(x).flatMap(g))
@@ -122,7 +122,7 @@ class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAn
     }
 
     "closing session work" in new Fixture {
-      val killSession = OrientDbSession { _.close() }
+      val killSession = ODBSession { _.close() }
 
       val session = for {
         x ← createDbAndUsers
@@ -142,9 +142,9 @@ class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAn
       var list = List.empty[Int]
 
       val session = for {
-        x ← OrientDbSession { _ ⇒ list = 3 :: list }
-        y ← OrientDbSession { _ ⇒ list = 2 :: list }
-        z ← OrientDbSession { _ ⇒ list = 1 :: list }
+        x ← ODBSession { _ ⇒ list = 3 :: list }
+        y ← ODBSession { _ ⇒ list = 2 :: list }
+        z ← ODBSession { _ ⇒ list = 1 :: list }
       } yield ()
 
       whenReady(session.runAsync()(pool, ec), Timeout(3.seconds)) { f ⇒
@@ -193,7 +193,7 @@ class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAn
     }
 
     "correctly propagates exception to future" in new Fixture {
-      val exceptionThrowingQuery = OrientDbSession { db ⇒
+      val exceptionThrowingQuery = ODBSession { db ⇒
         throw new IllegalStateException()
       }
 
@@ -207,7 +207,7 @@ class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAn
 
   "runAsyncCancellable" should {
     "enable us cancelling future" in new Fixture {
-      val exceptionThrowingQuery = OrientDbSession { db ⇒
+      val exceptionThrowingQuery = ODBSession { db ⇒
         throw new IllegalStateException()
       }
 
@@ -238,7 +238,7 @@ class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAn
     }
 
 
-    val createDbAndUsers = OrientDbSession { implicit db ⇒
+    val createDbAndUsers = ODBSession { implicit db ⇒
       db.create()
       createClass("User").createProperty("user", OType.STRING).createIndex(INDEX_TYPE.UNIQUE)
       db.declareIntent(new OIntentMassiveInsert())
@@ -256,15 +256,15 @@ class OrientDbSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAn
       db.declareIntent(null)
     }
 
-    val countUsersSession = OrientDbSession { db ⇒
+    val countUsersSession = ODBSession { db ⇒
       db.countClass("User")
     }
 
-    val cleanupUsersAndDb = OrientDbSession { db ⇒
+    val cleanupUsersAndDb = ODBSession { db ⇒
       db.drop()
     }
 
-    val longRunningQuery = OrientDbSession { implicit db ⇒
+    val longRunningQuery = ODBSession { implicit db ⇒
       db.create()
       createClass("User").createProperty("user", OType.STRING).createIndex(INDEX_TYPE.UNIQUE)
       db.declareIntent(new OIntentMassiveInsert())
