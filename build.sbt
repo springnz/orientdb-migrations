@@ -1,5 +1,4 @@
 name := "OrientDBScala"
-version := "0.1"
 organization := "ylabs"
 scalaVersion := "2.11.7"
 val orientDBVersion = "2.1-rc4"
