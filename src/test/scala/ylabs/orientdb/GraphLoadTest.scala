@@ -80,7 +80,7 @@ class GraphLoadTest extends WordSpec with ShouldMatchers {
       //TODO: add a random property to this, e.g. the time
     }
 
-  "tinkerpop api" should {
+  "tinkerpop api" ignore {
     "create scenario graph" taggedAs ODBLoadTestTag in {
       println("starting to delete the existing elements")
       graph.getEdges.foreach(_.remove())

@@ -52,7 +52,7 @@ class GraphDBTest extends WordSpec with ShouldMatchers {
       // user.addEdge(ViewListing.toString, listing, Map(s"random property ${math.random}" → math.random))
     }
 
-  "tinkerpop api" should {
+  "tinkerpop api" ignore {
     "create scenario graph" taggedAs ODBRemoteTestTag in {
       println("starting to delete the existing elements")
       graph.getEdges.asScala.foreach(_.remove())
