@@ -12,10 +12,10 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures._
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext}
-import scala.util.{Try, _}
+import scala.concurrent.{ Await, ExecutionContext }
+import scala.util.{ Try, _ }
 
-class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfterAll with OrientDocumentDBScala {
+class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfterAll with ODBScala {
 
   val random = scala.util.Random
   implicit val ec = ExecutionContext.global
@@ -31,7 +31,6 @@ class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfte
       }
     }
 
-
     "work with db" in new Fixture {
       Await.result(createDbAndUsers.runAsync()(pool, ec), 3.seconds)
       whenReady(countUsersSession.runAsync()(pool, ec), Timeout(3.seconds)) { notMapped ⇒
@@ -45,7 +44,7 @@ class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfte
   }
 
   "flatMap" should {
-  "work properly" in new Fixture {
+    "work properly" in new Fixture {
       val start = ODBSession { _ ⇒ 1 }
 
       def doSomething(x: Int) = ODBSession { _ ⇒ x + 10 }
@@ -218,7 +217,6 @@ class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfte
         _ ← cleanupUsersAndDb
       } yield y
 
-
       val (cancellation, result) = session.runAsyncCancellable()(pool, ec)
       Thread.sleep(200)
       cancellation()
@@ -230,13 +228,20 @@ class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfte
     }
   }
 
+  "sequence" should {
+    "convert a Seq of Sessions into a Session of Seq" in new Fixture {
+      val values = Seq(1, 3, 2)
+      val sessions = values.map(value ⇒ ODBSession(_ ⇒ value))
+      ODBSession.sequence(sessions).run().get shouldBe values
+    }
+  }
+
   trait Fixture {
     val userCount = 10
 
-    implicit val pool = new OrientDocumentDBConnectionPool {
-      override def loadDBConfig: Try[DBConfig] = Success(DBConfig("memory:doctest-session", "admin", "admin"))
+    implicit val pool = new ODBConnectionPool {
+      override def loadDBConfig: Try[ODBConnectConfig] = Success(ODBConnectConfig("memory:doctest-session", "admin", "admin"))
     }
-
 
     val createDbAndUsers = ODBSession { implicit db ⇒
       db.create()

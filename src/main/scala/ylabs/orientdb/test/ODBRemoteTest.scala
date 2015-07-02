@@ -1,12 +1,12 @@
 package ylabs.orientdb.test
 
-import ylabs.orientdb.DBConfig
+import ylabs.orientdb.ODBConnectConfig
 
 trait ODBRemoteTest extends ODBTestBase {
 
   val dbName: String
 
-  def dbConfig = DBConfig(s"remote:localhost/$dbName", "admin", "admin")
+  def dbConfig = ODBConnectConfig(s"remote:localhost/$dbName", "admin", "admin")
 
   def dbTestTag = ODBRemoteTestTag
 

@@ -2,19 +2,20 @@ package ylabs.orientdb
 
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
-import ylabs.util.Logging
+import com.typesafe.scalalogging.LazyLogging
 import ylabs.util.Pimpers._
 
 import scala.util.Try
 
-trait OrientDocumentDBConnectionPool extends Logging {
+trait ODBConnectionPool extends LazyLogging {
+  implicit val log = logger
 
-  def loadDBConfig: Try[DBConfig]
+  def loadDBConfig: Try[ODBConnectConfig]
 
   lazy val pool: Try[OPartitionedDatabasePool] =
     loadDBConfig.flatMap(createDatabasePool).withErrorLog("Could not acquire db connection from pool")
 
-  def createDatabasePool(config: DBConfig): Try[OPartitionedDatabasePool] =
+  def createDatabasePool(config: ODBConnectConfig): Try[OPartitionedDatabasePool] =
     Try {
       new OPartitionedDatabasePool(config.host, config.user, config.pass)
     }.withErrorLog("Could not create OPartitionedDatabasePool")

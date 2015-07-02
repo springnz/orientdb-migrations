@@ -8,7 +8,7 @@ import scala.util.{ Failure, Success, Try }
 
 class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
 
-  def run()(implicit dbConnectionPool: OrientDocumentDBConnectionPool): Try[A] =
+  def run()(implicit dbConnectionPool: ODBConnectionPool): Try[A] =
     dbConnectionPool
       .acquire()
       .flatMap(db ⇒ Try(run(db))
@@ -26,7 +26,7 @@ class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
     result
   }
 
-  def runAsync()(implicit dbConnectionPool: OrientDocumentDBConnectionPool, ec: ExecutionContext): Future[A] = Future[A] {
+  def runAsync()(implicit dbConnectionPool: ODBConnectionPool, ec: ExecutionContext): Future[A] = Future[A] {
     run() match {
       case Success(x) ⇒ x
       case Failure(e) ⇒ throw e
@@ -34,7 +34,7 @@ class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
   }
 
   // TODO more tests on cancellation
-  def runAsyncCancellable()(implicit dbConnectionPool: OrientDocumentDBConnectionPool, ec: ExecutionContext): (() ⇒ Unit, Future[A]) = {
+  def runAsyncCancellable()(implicit dbConnectionPool: ODBConnectionPool, ec: ExecutionContext): (() ⇒ Unit, Future[A]) = {
     val promise = Promise[A]()
 
     //TODO cleanup, make more comprehendable
@@ -73,9 +73,19 @@ class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
   def flatMap[B](fn: A ⇒ ODBSession[B]): ODBSession[B] = {
     new ODBSession[B](db ⇒ fn(block(db)).block(db))
   }
+
 }
 
 object ODBSession {
   def apply[A](block: ODatabaseDocumentTx ⇒ A): ODBSession[A] = new ODBSession[A](block)
   def map2[A, B, C](a: ODBSession[A], b: ODBSession[B])(f: (A, B) ⇒ C): ODBSession[C] = ??? // todo...just use scalaz
+
+  def sequence[A](sessions: Seq[ODBSession[A]]): ODBSession[Seq[A]] =
+    sessions.foldLeft(ODBSession(_ ⇒ Seq.empty[A])) {
+      case (accSession, nextSession) ⇒
+        for {
+          accResult ← accSession
+          result ← nextSession.map(result ⇒ result +: accResult)
+        } yield result
+    }.map(_.reverse)
 }
