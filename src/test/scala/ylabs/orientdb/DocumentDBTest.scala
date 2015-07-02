@@ -1,5 +1,8 @@
 package ylabs.orientdb
 
+import java.time.OffsetDateTime
+import java.util.Date
+
 import com.orientechnologies.orient.core.exception.OValidationException
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
@@ -16,21 +19,11 @@ import scala.util.Try
 
 trait DocumentDBTest
     extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll with BeforeAndAfterEach
-    with OrientDocumentDBScala with ODBTestBase {
+    with ODBTestBase {
 
   val dbName = "document-db-test"
 
   val classNames = List("User", "Person", "StrictClass", "TestClass")
-
-  def dropClasses(): Unit = ODBSession { implicit db ⇒
-    classNames.foreach(className ⇒ Try { dropClass(className) })
-  }.run().withErrorLog("failed to drop classes")
-
-  def deleteClassRecords(): Unit = ODBSession { implicit db ⇒
-    classNames.foreach { className ⇒
-      Try { sqlCommand(s"delete from $className").execute().asInstanceOf[java.lang.Integer] }
-    }
-  }.run().withErrorLog("failed to delete class records")
 
   override def beforeAll(): Unit = {
     dropClasses()
@@ -54,6 +47,7 @@ trait DocumentDBTest
       strictClass.setStrictMode(true)
       strictClass.createProperty(nameField, OType.STRING).setMandatory(true).createIndex(INDEX_TYPE.UNIQUE)
       strictClass.createProperty(ageField, OType.INTEGER).setMandatory(true)
+      strictClass.createProperty(dobField, OType.DATETIME).setMandatory(true)
 
       When("inserting duplicates")
       insert("jones", 30)
@@ -103,11 +97,13 @@ trait DocumentDBTest
     val className = "StrictClass"
     val nameField = "name"
     val ageField = "age"
+    val dobField = "dob"
 
     def insert(name: String, age: Int): ODocument = {
       val doc = new ODocument(className)
       doc.field(nameField, name)
       doc.field(ageField, age)
+      doc.dateTimeField(dobField, OffsetDateTime.now.minusYears(age))
       doc.save()
     }
   }

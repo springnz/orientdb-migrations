@@ -1,5 +1,8 @@
 package ylabs.orientdb
 
+import java.time.OffsetDateTime
+import java.util.Date
+
 import com.orientechnologies.orient.core.command.OCommandRequest
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
@@ -34,6 +37,11 @@ trait OrientDocumentDBScala extends Logging {
       val results: java.util.List[T] = db.command(sqlSynchQuery).execute(params4java: _*)
       results.asScala.toIndexedSeq
     }
+  }
+
+  implicit class docPimper(doc: ODocument) {
+    def dateTimeField(fieldName: String, dateTime: OffsetDateTime) =
+      doc.field(fieldName, Date.from(dateTime.toInstant))
   }
 
   def getSchema(implicit db: ODatabaseDocumentTx) =
