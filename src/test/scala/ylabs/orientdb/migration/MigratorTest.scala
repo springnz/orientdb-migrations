@@ -1,6 +1,9 @@
 package ylabs.orientdb.migration
 
+import com.orientechnologies.orient.core.metadata.schema.OType
+import com.orientechnologies.orient.core.record.impl.ODocument
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, ShouldMatchers, WordSpec }
+import ylabs.orientdb.ODBScala._
 import ylabs.orientdb.ODBSession
 import ylabs.orientdb.test.ODBTestBase
 import ylabs.util.DateTimeUtil
@@ -75,6 +78,35 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
       migrationLogs.map(_.version) shouldBe Seq(1, 2)
       successfulMigrationCounter shouldBe 2
       failedMigrationCounter shouldBe 1
+    }
+
+    "execute a schema migration" in new Fixture {
+      val migration1: ODBSession[Unit] = ODBSession { implicit db ⇒
+        val oClass = createClass("Person")
+        oClass.createProperty("name", OType.STRING)
+      }
+      val migration2: ODBSession[Unit] = ODBSession { implicit db ⇒
+        val oClass = findClass("Person")
+        oClass.createProperty("age", OType.INTEGER)
+      }
+      val migration3: ODBSession[Unit] = ODBSession { implicit db ⇒
+        val doc = new ODocument("Person")
+        doc.field("name", "bob")
+        doc.field("age", 123)
+        doc.save()
+      }
+
+      val migrations = Seq(Migration(1, migration1), Migration(2, migration2), Migration(3, migration3))
+
+      Migrator.runMigration(migrations)
+
+      val result = ODBSession(implicit db ⇒ selectClass("Person")(identity)).run().get
+      result.size shouldBe 1
+      result.head.getString("name") shouldBe "bob"
+      result.head.getInt("age") shouldBe 123
+
+      val migrationLogs = Migrator.fetchMigrationLogs().run().get
+      migrationLogs.map(_.version) shouldBe Seq(1, 2, 3)
     }
   }
 
