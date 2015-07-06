@@ -4,7 +4,7 @@ import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 
 import scala.concurrent.{ ExecutionContext, Future, Promise }
-import scala.util.{ Failure, Success, Try }
+import scala.util.{ Failure, Try }
 
 class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
 
@@ -26,12 +26,10 @@ class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
     result
   }
 
-  def runAsync()(implicit dbConnectionPool: ODBConnectionPool, ec: ExecutionContext): Future[A] = Future[A] {
-    run() match {
-      case Success(x) ⇒ x
-      case Failure(e) ⇒ throw e
+  def runAsync()(implicit dbConnectionPool: ODBConnectionPool, ec: ExecutionContext): Future[A] =
+    Future[A] {
+      run().get
     }
-  }
 
   // TODO more tests on cancellation
   def runAsyncCancellable()(implicit dbConnectionPool: ODBConnectionPool, ec: ExecutionContext): (() ⇒ Unit, Future[A]) = {
@@ -42,23 +40,18 @@ class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
       val tried = dbConnectionPool.acquire().flatMap { db ⇒
         // closing will happen on different thread (promise), but orient seems to be ok with it
         promise.future.onFailure { case e ⇒ closeIfOpen(db) }
+
         Try(run(db)).recoverWith {
           case e ⇒
             closeIfOpen(db)
             Failure(e)
         }
       }
-
-      tried match {
-        case Success(x) ⇒ x
-        case Failure(e) ⇒ throw e
-      }
+      tried.get
     }
 
-    val cancellation = () ⇒ {
+    def cancellation(): Unit =
       promise.failure(new Exception(s"${Thread.currentThread().getId} canceled"))
-      ()
-    }
 
     (cancellation, Future.firstCompletedOf(Seq(promise.future, future)))
   }
