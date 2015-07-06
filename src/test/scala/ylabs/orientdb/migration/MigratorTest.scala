@@ -26,7 +26,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
 
       Migrator.runMigration(Seq(migration)).isSuccess shouldBe true
 
-      val migrationLogs = Migrator.fetchMigrationLogs().run().get
+      val migrationLogs = Migrator.fetchMigrationLogs.run().get
       migrationLogs.size shouldBe 1
       val migrationLog = migrationLogs.head
       migrationLog.version shouldBe version
@@ -38,7 +38,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
 
       Migrator.runMigration(Seq(migration)).isFailure shouldBe true
 
-      val migrationLogs = Migrator.fetchMigrationLogs().run().get
+      val migrationLogs = Migrator.fetchMigrationLogs.run().get
       migrationLogs.size shouldBe 0
       failedMigrationCounter shouldBe 1
     }
@@ -49,7 +49,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
 
       Migrator.runMigration(migrations)
 
-      val migrationLogs = Migrator.fetchMigrationLogs().run().get
+      val migrationLogs = Migrator.fetchMigrationLogs.run().get
       migrationLogs.map(_.version) shouldBe versions
       successfulMigrationCounter shouldBe 3
     }
@@ -60,7 +60,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
       Migrator.runMigration(migrations).isSuccess shouldBe true
       Migrator.runMigration(migrations).isSuccess shouldBe true
 
-      val migrationLogs = Migrator.fetchMigrationLogs().run().get
+      val migrationLogs = Migrator.fetchMigrationLogs.run().get
       migrationLogs.size shouldBe 3
       successfulMigrationCounter shouldBe 3
     }
@@ -74,7 +74,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
 
       Migrator.runMigration(migrations)
 
-      val migrationLogs = Migrator.fetchMigrationLogs().run().get
+      val migrationLogs = Migrator.fetchMigrationLogs.run().get
       migrationLogs.map(_.version) shouldBe Seq(1, 2)
       successfulMigrationCounter shouldBe 2
       failedMigrationCounter shouldBe 1
@@ -105,7 +105,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
       result.head.getString("name") shouldBe "bob"
       result.head.getInt("age") shouldBe 123
 
-      val migrationLogs = Migrator.fetchMigrationLogs().run().get
+      val migrationLogs = Migrator.fetchMigrationLogs.run().get
       migrationLogs.map(_.version) shouldBe Seq(1, 2, 3)
     }
 
@@ -116,7 +116,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
       )
 
       Migrator.runMigration(migrations).isFailure shouldBe true
-      Migrator.fetchMigrationLogs().run().get.size shouldBe 0
+      Migrator.fetchMigrationLogs.run().get.size shouldBe 0
       successfulMigrationCounter shouldBe 0
     }
   }

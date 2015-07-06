@@ -15,6 +15,10 @@ import scala.util.{ Failure, Try }
 
 case class Migration(version: Int, session: ODBSession[Unit])
 
+trait ODBMigrations {
+  val migrations: Seq[Migration]
+}
+
 case class MigrationLog(version: Int, timestamp: OffsetDateTime) {
   import MigrationLog._
   def toDocument(implicit db: ODatabaseDocumentTx): ODocument = {
@@ -51,7 +55,7 @@ object Migrator extends ODBScala {
       }
     }
 
-  def fetchMigrationLogs()(implicit pool: ODBConnectionPool): ODBSession[IndexedSeq[MigrationLog]] =
+  def fetchMigrationLogs(implicit pool: ODBConnectionPool): ODBSession[IndexedSeq[MigrationLog]] =
     ODBSession { implicit db ⇒
       log.info("Fetching migration logs...")
       val migrationLogs = selectClass(MigrationLog.className)(MigrationLog.fromDocument)
@@ -101,7 +105,7 @@ object Migrator extends ODBScala {
       sequence.run().withErrorLog("Error executing migration")
     }
 
-    def abort(): Failure[Unit] = {
+    def abort: Failure[Unit] = {
       val msg = "Migration sequence aborted since it has duplicate versions. No migrations were executed."
       log.error(msg)
       Failure(new RuntimeException(msg))
@@ -110,7 +114,7 @@ object Migrator extends ODBScala {
     if (isValidMigrationSequence)
       run()
     else
-      abort()
+      abort
   }
 
   def insertLog(version: Int, result: Boolean = true)(implicit pool: ODBConnectionPool): ODBSession[Unit] =
