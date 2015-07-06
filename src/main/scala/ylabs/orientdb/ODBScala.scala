@@ -1,34 +1,82 @@
 package ylabs.orientdb
 
+import java.time.OffsetDateTime
+import java.util.Date
+
 import com.orientechnologies.orient.core.command.OCommandRequest
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.sql.OCommandSQL
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
-import ylabs.util.Logging
+import ylabs.util.{ DateTimeUtil, Logging }
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.concurrent.{ ExecutionContext, Future }
 
-trait OrientDocumentDBScala extends Logging {
+object ODBScala {
+  implicit class docPimper(doc: ODocument) {
+
+    def setDateTime(fieldName: String, dateTime: OffsetDateTime): ODocument =
+      doc.field(fieldName, Date.from(dateTime.toInstant))
+
+    def getUtcOffsetDateTime(fieldName: String): OffsetDateTime = {
+      val jDate = doc.field(fieldName).asInstanceOf[Date]
+      OffsetDateTime.ofInstant(jDate.toInstant, DateTimeUtil.utcZone)
+    }
+
+    def getInt(fieldName: String): Int =
+      doc.field(fieldName).asInstanceOf[Int]
+
+    def getLong(fieldName: String): Long =
+      doc.field(fieldName).asInstanceOf[Long]
+
+    def getFloat(fieldName: String): Float =
+      doc.field(fieldName).asInstanceOf[Float]
+
+    def getDouble(fieldName: String): Double =
+      doc.field(fieldName).asInstanceOf[Double]
+
+    def getBigDecimal(fieldName: String): BigDecimal =
+      doc.field(fieldName).asInstanceOf[BigDecimal]
+
+    def getString(fieldName: String): String =
+      doc.field(fieldName).asInstanceOf[String]
+  }
+}
+
+trait ODBScala extends Logging {
+
+  import ODBScala._
 
   implicit class dbWrapper(db: ODatabaseDocumentTx) {
-    def q[T](sql: String, params: AnyRef*): immutable.IndexedSeq[T] = {
+
+    def q(sql: String, params: AnyRef*): immutable.IndexedSeq[ODocument] = {
       val params4java = params.toArray
-      val results: java.util.List[T] = db.query(new OSQLSynchQuery[T](sql), params4java: _*)
+      val results: java.util.List[ODocument] = db.query(new OSQLSynchQuery[ODocument](sql), params4java: _*)
       results.asScala.toIndexedSeq
     }
+
+    def qSingleResult(sql: String, params: AnyRef*): Option[ODocument] = {
+      val result = q(sql, params)
+      if (result.size > 1)
+        throw new RuntimeException("Query returned multiple results, but we only expected one.")
+      result.headOption
+    }
+
+    def qSingleResultAsInts(sql: String, params: AnyRef*): Option[Seq[Int]] =
+      qSingleResult(sql, params).map(_.fieldValues().map(_.asInstanceOf[Int]))
+
     def count(sql: String, params: AnyRef*): Long = {
       val params4java = params.toArray
       val result: java.util.List[ODocument] = db.query(new OSQLSynchQuery[ODocument](sql), params4java: _*)
-      val count: java.lang.Long = result.get(0).field("count")
-      count.toLong
+      result.get(0).field("count").asInstanceOf[Long]
     }
   }
 
   implicit class sqlSynchQueryWrapper[T](sqlSynchQuery: OSQLSynchQuery[T]) {
+
     def exec(params: AnyRef*)(implicit db: ODatabaseDocumentTx): immutable.IndexedSeq[T] = {
       val params4java = params.toArray
       val results: java.util.List[T] = db.command(sqlSynchQuery).execute(params4java: _*)
@@ -57,7 +105,7 @@ trait OrientDocumentDBScala extends Logging {
   def escapeSqlString(string: String) = string.replace("\\", "\\\\").replace("\"", "\\\"")
 
   def selectClass[T](className: String)(mapper: ODocument ⇒ T)(implicit db: ODatabaseDocumentTx): IndexedSeq[T] =
-    db.q[ODocument](s"select from $className").map(mapper)
+    db.q(s"select from $className").map(mapper)
 
   def dbFuture[T](block: ⇒ T)(implicit db: ODatabaseDocumentTx, ec: ExecutionContext): Future[T] =
     Future {

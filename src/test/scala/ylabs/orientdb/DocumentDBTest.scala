@@ -1,5 +1,7 @@
 package ylabs.orientdb
 
+import java.time.OffsetDateTime
+
 import com.orientechnologies.orient.core.exception.OValidationException
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
@@ -8,29 +10,18 @@ import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.storage.ORecordDuplicatedException
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import org.scalatest._
+import ylabs.orientdb.ODBScala._
 import ylabs.orientdb.test.ODBTestBase
-import ylabs.util.Pimpers._
 
 import scala.collection.JavaConverters._
-import scala.util.Try
 
 trait DocumentDBTest
     extends WordSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfterAll with BeforeAndAfterEach
-    with OrientDocumentDBScala with ODBTestBase {
+    with ODBTestBase {
 
   val dbName = "document-db-test"
 
   val classNames = List("User", "Person", "StrictClass", "TestClass")
-
-  def dropClasses(): Unit = OrientDbSession { implicit db ⇒
-    classNames.foreach(className ⇒ Try { dropClass(className) })
-  }.run().withErrorLog("failed to drop classes")
-
-  def deleteClassRecords(): Unit = OrientDbSession { implicit db ⇒
-    classNames.foreach { className ⇒
-      Try { sqlCommand(s"delete from $className").execute().asInstanceOf[java.lang.Integer] }
-    }
-  }.run().withErrorLog("failed to delete class records")
 
   override def beforeAll(): Unit = {
     dropClasses()
@@ -54,6 +45,7 @@ trait DocumentDBTest
       strictClass.setStrictMode(true)
       strictClass.createProperty(nameField, OType.STRING).setMandatory(true).createIndex(INDEX_TYPE.UNIQUE)
       strictClass.createProperty(ageField, OType.INTEGER).setMandatory(true)
+      strictClass.createProperty(dobField, OType.DATETIME).setMandatory(true)
 
       When("inserting duplicates")
       insert("jones", 30)
@@ -103,18 +95,20 @@ trait DocumentDBTest
     val className = "StrictClass"
     val nameField = "name"
     val ageField = "age"
+    val dobField = "dob"
 
     def insert(name: String, age: Int): ODocument = {
       val doc = new ODocument(className)
       doc.field(nameField, name)
       doc.field(ageField, age)
+      doc.setDateTime(dobField, OffsetDateTime.now.minusYears(age))
       doc.save()
     }
   }
 
   "Document DB" should {
 
-    val userCount = 10000
+    val userCount = 10
     val className = "User"
     val fieldName = "name"
 
@@ -147,7 +141,7 @@ trait DocumentDBTest
     "DB Search" taggedAs dbTestTag in {
       implicit val db = pool.acquire().get
       time {
-        val result = db.q[ODocument](s"select $fieldName from $className where $fieldName = ?", "user10")
+        val result = db.q(s"select $fieldName from $className where $fieldName = ?", "user10")
         assert(result.head.field(fieldName).toString === "user10")
       }
       db.close()
@@ -156,9 +150,20 @@ trait DocumentDBTest
     "DB select all" taggedAs dbTestTag in {
       implicit val db = pool.acquire().get
       time {
-        val result = db.q[ODocument]("select * from User")
+        val result = db.q("select * from User")
         result.size shouldBe userCount
       }
+      db.close()
+    }
+
+    "DB select single result" taggedAs dbTestTag in {
+      implicit val db = pool.acquire().get
+      val sql = "select min(id), max(id) from User"
+      val blah = db.qSingleResult(sql)
+      println(blah.get.fieldValues().toSeq)
+      val Some(Seq(min, max)) = db.qSingleResultAsInts(sql)
+      min shouldBe 1
+      max shouldBe userCount
       db.close()
     }
 
@@ -191,7 +196,7 @@ trait DocumentDBTest
       doc.setClassName("Person")
       doc.save()
 
-      val result = db.q[ODocument]("select account[savings] from Person")
+      val result = db.q("select account[savings] from Person")
       assert(Int.unbox(result.head.field("account")) === 1234)
       db.close()
     }
