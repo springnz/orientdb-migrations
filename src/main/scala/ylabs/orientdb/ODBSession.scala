@@ -71,14 +71,11 @@ class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
 
 object ODBSession {
   def apply[A](block: ODatabaseDocumentTx ⇒ A): ODBSession[A] = new ODBSession[A](block)
+
   def map2[A, B, C](a: ODBSession[A], b: ODBSession[B])(f: (A, B) ⇒ C): ODBSession[C] = ??? // todo...just use scalaz
 
   def sequence[A](sessions: Seq[ODBSession[A]]): ODBSession[Seq[A]] =
     sessions.foldLeft(ODBSession(_ ⇒ Seq.empty[A])) {
-      case (accSession, nextSession) ⇒
-        for {
-          accResult ← accSession
-          result ← nextSession.map(result ⇒ result +: accResult)
-        } yield result
-    }.map(_.reverse)
+      case (a, sess) ⇒ a.flatMap(acc ⇒ sess.map(acc :+ _))
+    }
 }
