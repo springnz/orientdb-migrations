@@ -11,6 +11,8 @@ import ylabs.orientdb.{ ODBConnectionPool, ODBScala, ODBSession }
 import ylabs.util.DateTimeUtil
 import ylabs.util.Pimpers._
 
+import scala.util.Try
+
 case class Migration(version: Int, session: ODBSession[Unit])
 
 case class MigrationLog(version: Int, timestamp: OffsetDateTime) {
@@ -63,7 +65,7 @@ object Migrator extends ODBScala {
       db.qSingleResult(sql).map(_.getInt("max"))
     }
 
-  def runMigration(migrations: Seq[Migration])(implicit pool: ODBConnectionPool): Boolean = {
+  def runMigration(migrations: Seq[Migration])(implicit pool: ODBConnectionPool): Try[Unit] = {
 
     def migrationsToExecute(currentVersion: Option[Int]) = {
       val sortedMigrations = migrations.sortBy(_.version)
@@ -93,7 +95,7 @@ object Migrator extends ODBScala {
       log.info(s"Successfully executed all migrations: ${migrationResult.mkString(",")}")
     }
 
-    sequence.run().withErrorLog("Error executing migration").isSuccess
+    sequence.run().withErrorLog("Error executing migration")
   }
 
   def insertLog(version: Int, result: Boolean = true)(implicit pool: ODBConnectionPool): ODBSession[Unit] =

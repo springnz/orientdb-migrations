@@ -24,7 +24,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
     "handle one successful migration" in new Fixture {
       val migration = Migration(version, successMigration)
 
-      Migrator.runMigration(Seq(migration))
+      Migrator.runMigration(Seq(migration)).isSuccess shouldBe true
 
       val migrationLogs = Migrator.fetchMigrationLogs().run().get
       migrationLogs.size shouldBe 1
@@ -36,7 +36,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
     "handle one failed migration" in new Fixture {
       val migration = Migration(version, failureMigration)
 
-      Migrator.runMigration(Seq(migration))
+      Migrator.runMigration(Seq(migration)).isFailure shouldBe true
 
       val migrationLogs = Migrator.fetchMigrationLogs().run().get
       migrationLogs.size shouldBe 0
@@ -57,8 +57,8 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
     "skip existing migrations" in new Fixture {
       val migrations = (1 to 3).map(Migration(_, successMigration))
 
-      Migrator.runMigration(migrations)
-      Migrator.runMigration(migrations)
+      Migrator.runMigration(migrations).isSuccess shouldBe true
+      Migrator.runMigration(migrations).isSuccess shouldBe true
 
       val migrationLogs = Migrator.fetchMigrationLogs().run().get
       migrationLogs.size shouldBe 3
@@ -98,7 +98,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
 
       val migrations = Seq(Migration(1, migration1), Migration(2, migration2), Migration(3, migration3))
 
-      Migrator.runMigration(migrations)
+      Migrator.runMigration(migrations).isSuccess shouldBe true
 
       val result = ODBSession(implicit db ⇒ selectClass("Person")(identity)).run().get
       result.size shouldBe 1
