@@ -1,7 +1,7 @@
 name := "OrientDBScala"
 organization := "ylabs"
 scalaVersion := "2.11.7"
-val orientDBVersion = "2.1-rc4"
+val orientDBVersion = "2.1-rc5"
 
 val repo = "https://nexus.prod.corp/content"
 resolvers ++= Seq(
