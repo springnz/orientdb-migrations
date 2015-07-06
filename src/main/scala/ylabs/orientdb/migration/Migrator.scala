@@ -11,7 +11,7 @@ import ylabs.orientdb.{ ODBConnectionPool, ODBScala, ODBSession }
 import ylabs.util.DateTimeUtil
 import ylabs.util.Pimpers._
 
-import scala.util.Try
+import scala.util.{ Failure, Try }
 
 case class Migration(version: Int, session: ODBSession[Unit])
 
@@ -67,6 +67,8 @@ object Migrator extends ODBScala {
 
   def runMigration(migrations: Seq[Migration])(implicit pool: ODBConnectionPool): Try[Unit] = {
 
+    def isValidMigrationSequence = migrations.map(_.version).distinct.size == migrations.size
+
     def migrationsToExecute(currentVersion: Option[Int]) = {
       val sortedMigrations = migrations.sortBy(_.version)
       currentVersion match {
@@ -84,18 +86,31 @@ object Migrator extends ODBScala {
         migration.version
       }
 
-    log.info("Starting migration sequence")
+    def run(): Try[Unit] = {
+      log.info("Starting migration sequence")
 
-    createMigrationLogSchema().run().withErrorLog("Error creating MigrationLog schema")
+      createMigrationLogSchema().run().withErrorLog("Error creating MigrationLog schema")
 
-    val sequence = for {
-      currentVersion ← findCurrentSchemaVersion
-      migrationResult ← ODBSession.sequence(migrationsToExecute(currentVersion).map(executableMigration))
-    } yield {
-      log.info(s"Successfully executed all migrations: ${migrationResult.mkString(",")}")
+      val sequence = for {
+        currentVersion ← findCurrentSchemaVersion
+        migrationResult ← ODBSession.sequence(migrationsToExecute(currentVersion).map(executableMigration))
+      } yield {
+        log.info(s"Successfully executed all migrations: ${migrationResult.mkString(",")}")
+      }
+
+      sequence.run().withErrorLog("Error executing migration")
     }
 
-    sequence.run().withErrorLog("Error executing migration")
+    def abort(): Failure[Unit] = {
+      val msg = "Migration sequence aborted since it has duplicate versions. No migrations were executed."
+      log.error(msg)
+      Failure(new RuntimeException(msg))
+    }
+
+    if (isValidMigrationSequence)
+      run()
+    else
+      abort()
   }
 
   def insertLog(version: Int, result: Boolean = true)(implicit pool: ODBConnectionPool): ODBSession[Unit] =

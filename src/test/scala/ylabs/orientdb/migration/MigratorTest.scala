@@ -108,6 +108,17 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
       val migrationLogs = Migrator.fetchMigrationLogs().run().get
       migrationLogs.map(_.version) shouldBe Seq(1, 2, 3)
     }
+
+    "aborts migration if there are duplicate versions" in new Fixture {
+      val migrations = Seq(
+        Migration(1, successMigration),
+        Migration(1, successMigration)
+      )
+
+      Migrator.runMigration(migrations).isFailure shouldBe true
+      Migrator.fetchMigrationLogs().run().get.size shouldBe 0
+      successfulMigrationCounter shouldBe 0
+    }
   }
 
   trait Fixture {
