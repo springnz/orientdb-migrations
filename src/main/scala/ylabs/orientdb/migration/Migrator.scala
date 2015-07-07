@@ -45,7 +45,7 @@ object Migrator extends ODBScala {
   def createMigrationLogSchema()(implicit pool: ODBConnectionPool): ODBSession[Unit] =
     ODBSession { implicit db ⇒
       if (getSchema.existsClass(MigrationLog.className)) {
-        log.info("MigrationLog schema already created")
+        log.info("MigrationLog schema exists")
       } else {
         log.info("Creating MigrationLog schema")
         val oClass = createClass(MigrationLog.className)
@@ -66,7 +66,9 @@ object Migrator extends ODBScala {
     ODBSession { implicit db ⇒
       log.info("Finding current schema version")
       val sql = s"select max(${MigrationLog.versionFieldName}) from ${MigrationLog.className}"
-      db.qSingleResult(sql).map(_.getInt("max"))
+      val result = db.qSingleResult(sql).map(_.getInt("max"))
+      result.foreach(version ⇒ log.info(s"Currently at schema version $version"))
+      result
     }
 
   def runMigration(migrations: Seq[Migration])(implicit pool: ODBConnectionPool): Try[Unit] = {

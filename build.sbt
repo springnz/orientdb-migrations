@@ -11,13 +11,14 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "2.2.4" % Test withSources(),
+  "ylabs" %% "util-lib" % "1.1.0" withSources(),
+  "com.typesafe" % "config" % "1.3.0" withSources(),
   "com.orientechnologies" % "orientdb-core" % orientDBVersion withSources(),
   "com.orientechnologies" % "orientdb-graphdb" % orientDBVersion withSources(),
   "com.orientechnologies" % "orientdb-client" % orientDBVersion withSources(),
   "com.michaelpollmeier" %% "gremlin-scala" % "3.0.0.M9-incubating" withSources(),
-  "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M1" withSources(),
-  "org.scalatest" %% "scalatest" % "2.2.4" % Test withSources(),
-  "ylabs" %% "util-lib" % "1.1.0" withSources()
+  "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M1" withSources()
     // "com.orientechnologies" % "orientdb-enterprise" % orientDBVersion withSources(),
     // "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0"
 )

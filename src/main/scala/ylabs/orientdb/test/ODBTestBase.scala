@@ -9,19 +9,19 @@ import scala.util.{ Success, Try }
 trait ODBTestBase extends ODBScala {
 
   implicit lazy val pool = new ODBConnectionPool {
-    override def loadDBConfig: Try[ODBConnectConfig] = {
-      log.info(s"Loading $dbConfig")
-      Success(dbConfig)
+    override def dbConfig: Try[ODBConnectConfig] = {
+      log.info(s"Using $dbConnectConfig")
+      Success(dbConnectConfig)
     }
   }
 
-  def dbConfig: ODBConnectConfig
+  def dbConnectConfig: ODBConnectConfig
 
   def dbTestTag: Tag
 
-  val dbName: String
+  def dbName: String
 
-  val classNames: Seq[String]
+  def classNames: Seq[String]
 
   def dropClasses(): Unit = ODBSession { implicit db ⇒
     classNames.foreach(className ⇒ Try { dropClass(className) })
