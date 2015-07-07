@@ -159,8 +159,6 @@ trait DocumentDBTest
     "DB select single result" taggedAs dbTestTag in {
       implicit val db = pool.acquire().get
       val sql = "select min(id), max(id) from User"
-      val blah = db.qSingleResult(sql)
-      println(blah.get.fieldValues().toSeq)
       val Some(Seq(min, max)) = db.qSingleResultAsInts(sql)
       min shouldBe 1
       max shouldBe userCount
