@@ -66,8 +66,11 @@ trait DocumentDBTest
       db.count(""" select count(*) from StrictClass where name="jones"  """) shouldBe 0
       db.count(""" select count(*) from StrictClass where name="bob"  """) shouldBe 1
 
-      And("the selectClass method should pick up the updated record")
-      selectClass(className)(identity).head.field(nameField).asInstanceOf[String] shouldBe "bob"
+      And("the selectClass method should find the updated record")
+      selectClass(className)(identity).head.getString(nameField) shouldBe "bob"
+
+      And("singleResult method should find the updated record")
+      db.qSingleResult("select * from StrictClass").get.getString(nameField) shouldBe "bob"
 
       When("all records are deleted")
       sqlCommand(""" delete from StrictClass  """).execute()
@@ -108,7 +111,7 @@ trait DocumentDBTest
 
   "Document DB" should {
 
-    val userCount = 10
+    val userCount = 10000
     val className = "User"
     val fieldName = "name"
 
