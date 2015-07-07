@@ -59,20 +59,17 @@ trait ODBScala extends Logging {
     }
 
     def qSingleResult(sql: String, params: AnyRef*): Option[ODocument] = {
-      val result = q(sql, params)
+      val result = q(sql, params: _*)
       if (result.size > 1)
         throw new RuntimeException("Query returned multiple results, but we only expected one.")
       result.headOption
     }
 
     def qSingleResultAsInts(sql: String, params: AnyRef*): Option[Seq[Int]] =
-      qSingleResult(sql, params).map(_.fieldValues().map(_.asInstanceOf[Int]))
+      qSingleResult(sql, params: _*).map(_.fieldValues().map(_.asInstanceOf[Int]))
 
-    def count(sql: String, params: AnyRef*): Long = {
-      val params4java = params.toArray
-      val result: java.util.List[ODocument] = db.query(new OSQLSynchQuery[ODocument](sql), params4java: _*)
-      result.get(0).field("count").asInstanceOf[Long]
-    }
+    def count(sql: String, params: AnyRef*): Long =
+      qSingleResult(sql, params: _*).get.getLong("count")
   }
 
   implicit class sqlSynchQueryWrapper[T](sqlSynchQuery: OSQLSynchQuery[T]) {
