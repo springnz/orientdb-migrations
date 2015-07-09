@@ -14,12 +14,12 @@ libraryDependencies ++= Seq(
   "com.orientechnologies" % "orientdb-core" % orientDBVersion withSources(),
   "com.orientechnologies" % "orientdb-graphdb" % orientDBVersion withSources(),
   "com.orientechnologies" % "orientdb-client" % orientDBVersion withSources(),
+  // "com.orientechnologies" % "orientdb-enterprise" % orientDBVersion withSources(),
+  // "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0",
   "com.michaelpollmeier" %% "gremlin-scala" % "3.0.0.M9-incubating" withSources(),
   "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M1" withSources(),
-  "org.scalatest" %% "scalatest" % "2.2.4" % Test withSources(),
-  "ylabs" %% "util-lib" % "1.1.0" withSources()
-    // "com.orientechnologies" % "orientdb-enterprise" % orientDBVersion withSources(),
-    // "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0"
+  "org.scalatest" %% "scalatest" % "2.2.4" % Test,
+  "ylabs" %% "util-lib" % "1.2.0"
 )
 
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oD")
