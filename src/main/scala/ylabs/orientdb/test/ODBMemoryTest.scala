@@ -4,9 +4,9 @@ import ylabs.orientdb.{ODBConnectConfig, ODBSession}
 
 trait ODBMemoryTest extends ODBTestBase {
 
-  val dbName: String
+  def dbName: String
 
-  def dbConfig = ODBConnectConfig(s"memory:$dbName", "admin", "admin")
+  def dbConnectConfig = ODBConnectConfig(s"memory:$dbName", "admin", "admin")
 
   def dbTestTag = ODBMemoryTestTag
 

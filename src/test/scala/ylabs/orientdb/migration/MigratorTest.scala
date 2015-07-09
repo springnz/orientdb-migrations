@@ -5,11 +5,12 @@ import com.orientechnologies.orient.core.record.impl.ODocument
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, ShouldMatchers, WordSpec }
 import ylabs.orientdb.ODBScala._
 import ylabs.orientdb.ODBSession
-import ylabs.orientdb.test.ODBTestBase
+import ylabs.orientdb.test.{ ODBMemoryTest, ODBTestBase }
 import ylabs.util.DateTimeUtil
 import ylabs.util.Pimpers._
 
-trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach with BeforeAndAfterAll with ODBTestBase {
+class MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach with BeforeAndAfterAll
+    with ODBTestBase with ODBMemoryTest {
 
   val dbName = "migrator-test"
 
@@ -112,8 +113,7 @@ trait MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
     "aborts migration if there are duplicate versions" in new Fixture {
       val migrations = Seq(
         Migration(1, successMigration),
-        Migration(1, successMigration)
-      )
+        Migration(1, successMigration))
 
       Migrator.runMigration(migrations).isFailure shouldBe true
       Migrator.fetchMigrationLogs.run().get.size shouldBe 0
