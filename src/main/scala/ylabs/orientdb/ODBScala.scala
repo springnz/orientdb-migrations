@@ -75,8 +75,7 @@ trait ODBScala extends Logging {
   implicit class sqlSynchQueryWrapper[T](sqlSynchQuery: OSQLSynchQuery[T]) {
 
     def exec(params: AnyRef*)(implicit db: ODatabaseDocumentTx): immutable.IndexedSeq[T] = {
-      val params4java = params.toArray
-      val results: java.util.List[T] = db.command(sqlSynchQuery).execute(params4java: _*)
+      val results: java.util.List[T] = db.command(sqlSynchQuery).execute(params.toArray: _*)
       results.asScala.toIndexedSeq
     }
   }
