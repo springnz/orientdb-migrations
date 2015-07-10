@@ -8,7 +8,7 @@ import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import ylabs.orientdb.ODBScala._
 import ylabs.orientdb.{ ODBConnectionPool, ODBScala, ODBSession }
-import ylabs.util.DateTimeUtil
+import ylabs.util.{Logging, DateTimeUtil}
 import ylabs.util.Pimpers._
 
 import scala.util.{ Failure, Try }
@@ -40,7 +40,7 @@ object MigrationLog {
   }
 }
 
-object Migrator extends ODBScala {
+object Migrator extends ODBScala with Logging {
 
   def createMigrationLogSchema()(implicit pool: ODBConnectionPool): ODBSession[Unit] =
     ODBSession { implicit db ⇒

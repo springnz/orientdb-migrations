@@ -1,6 +1,7 @@
 package ylabs.orientdb
 
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 import com.orientechnologies.orient.core.exception.OValidationException
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
@@ -10,7 +11,6 @@ import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.storage.ORecordDuplicatedException
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import org.scalatest._
-import ylabs.orientdb.ODBScala._
 import ylabs.orientdb.test.ODBTestBase
 
 import scala.collection.JavaConverters._
@@ -21,7 +21,7 @@ trait DocumentDBTest
 
   val dbName = "document-db-test"
 
-  val classNames = List("User", "Person", "StrictClass", "TestClass")
+  val classNames = List("User", "Person", "StrictClass", "TestClass", "FunctionTest")
 
   override def beforeAll(): Unit = {
     dropClasses()
@@ -106,6 +106,23 @@ trait DocumentDBTest
       doc.field(ageField, age)
       doc.setDateTime(dobField, OffsetDateTime.now.minusYears(age))
       doc.save()
+    }
+  }
+
+  "DateFunction" should {
+
+    "add seconds to a date" in {
+      implicit val db = pool.acquire().get
+
+      registerFunctions()
+
+      sqlCommand("create class FunctionTest").execute()
+      sqlCommand("""insert into FunctionTest(id, timestamp) values (1, date("2015-07-10 12:00:00")) """).execute()
+      sqlCommand("update FunctionTest set timestamp = dateTimePlusSeconds(timestamp, 30) where id = 1").execute()
+
+      val timestamp = db.qSingleResult("select timestamp from FunctionTest where id = 1").get.getUtcOffsetDateTime("timestamp")
+      timestamp.format(DateTimeFormatter.ISO_DATE_TIME) shouldBe "2015-07-10T00:00:30Z"
+      db.close()
     }
   }
 

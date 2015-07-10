@@ -2,11 +2,12 @@ package ylabs.orientdb.test
 
 import org.scalatest.Tag
 import ylabs.orientdb.{ ODBConnectConfig, ODBSession, ODBConnectionPool, ODBScala }
+import ylabs.util.Logging
 import ylabs.util.Pimpers._
 
 import scala.util.{ Success, Try }
 
-trait ODBTestBase extends ODBScala {
+trait ODBTestBase extends ODBScala with Logging {
 
   implicit lazy val pool = new ODBConnectionPool {
     override def dbConfig: Try[ODBConnectConfig] = {

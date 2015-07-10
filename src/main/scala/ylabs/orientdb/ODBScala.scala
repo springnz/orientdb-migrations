@@ -7,48 +7,22 @@ import com.orientechnologies.orient.core.command.OCommandRequest
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.orientechnologies.orient.core.record.impl.ODocument
-import com.orientechnologies.orient.core.sql.OCommandSQL
+import com.orientechnologies.orient.core.sql.{ OSQLEngine, OCommandSQL }
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
+import ylabs.orientdb.functions.OSQLFunctions
 import ylabs.util.{ DateTimeUtil, Logging }
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.concurrent.{ ExecutionContext, Future }
 
-object ODBScala {
-  implicit class docPimper(doc: ODocument) {
+object ODBScala extends ODBScala
 
-    def setDateTime(fieldName: String, dateTime: OffsetDateTime): ODocument =
-      doc.field(fieldName, Date.from(dateTime.toInstant))
+trait ODBScala {
 
-    def getUtcOffsetDateTime(fieldName: String): OffsetDateTime = {
-      val jDate = doc.field(fieldName).asInstanceOf[Date]
-      OffsetDateTime.ofInstant(jDate.toInstant, DateTimeUtil.utcZone)
-    }
-
-    def getInt(fieldName: String): Int =
-      doc.field(fieldName).asInstanceOf[Int]
-
-    def getLong(fieldName: String): Long =
-      doc.field(fieldName).asInstanceOf[Long]
-
-    def getFloat(fieldName: String): Float =
-      doc.field(fieldName).asInstanceOf[Float]
-
-    def getDouble(fieldName: String): Double =
-      doc.field(fieldName).asInstanceOf[Double]
-
-    def getBigDecimal(fieldName: String): BigDecimal =
-      doc.field(fieldName).asInstanceOf[BigDecimal]
-
-    def getString(fieldName: String): String =
-      doc.field(fieldName).asInstanceOf[String]
+  def registerFunctions(): Unit = {
+    OSQLEngine.getInstance().registerFunction("dateTimePlusSeconds", OSQLFunctions.dateTimeAddSecondsFunction())
   }
-}
-
-trait ODBScala extends Logging {
-
-  import ODBScala._
 
   implicit class dbWrapper(db: ODatabaseDocumentTx) {
 
@@ -103,9 +77,42 @@ trait ODBScala extends Logging {
   def selectClass[T](className: String)(mapper: ODocument ⇒ T)(implicit db: ODatabaseDocumentTx): IndexedSeq[T] =
     db.q(s"select from $className").map(mapper)
 
+  def selectClassDocuments(className: String)(implicit db: ODatabaseDocumentTx): IndexedSeq[ODocument] =
+    selectClass(className)(identity)
+
   def dbFuture[T](block: ⇒ T)(implicit db: ODatabaseDocumentTx, ec: ExecutionContext): Future[T] =
     Future {
       ODatabaseRecordThreadLocal.INSTANCE.set(db)
       block
     }
+
+  implicit class docPimper(doc: ODocument) {
+
+    def setDateTime(fieldName: String, dateTime: OffsetDateTime): ODocument =
+      doc.field(fieldName, Date.from(dateTime.toInstant))
+
+    def getUtcOffsetDateTime(fieldName: String): OffsetDateTime = {
+      val jDate = doc.field(fieldName).asInstanceOf[Date]
+      OffsetDateTime.ofInstant(jDate.toInstant, DateTimeUtil.utcZone)
+    }
+
+    def getInt(fieldName: String): Int =
+      doc.field(fieldName).asInstanceOf[Int]
+
+    def getLong(fieldName: String): Long =
+      doc.field(fieldName).asInstanceOf[Long]
+
+    def getFloat(fieldName: String): Float =
+      doc.field(fieldName).asInstanceOf[Float]
+
+    def getDouble(fieldName: String): Double =
+      doc.field(fieldName).asInstanceOf[Double]
+
+    def getBigDecimal(fieldName: String): BigDecimal =
+      doc.field(fieldName).asInstanceOf[BigDecimal]
+
+    def getString(fieldName: String): String =
+      doc.field(fieldName).asInstanceOf[String]
+  }
 }
+
