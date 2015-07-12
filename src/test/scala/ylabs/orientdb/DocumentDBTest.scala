@@ -11,7 +11,6 @@ import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.storage.ORecordDuplicatedException
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import org.scalatest._
-import ylabs.orientdb.plugin.OSQLFunctions
 import ylabs.orientdb.test.ODBTestBase
 
 import scala.collection.JavaConverters._
@@ -112,12 +111,12 @@ trait DocumentDBTest
 
   "DateFunction" should {
     /**
-     * You will need to install the YLabs OrientDB Functions plugin if testing on a remote instance
-     * https://bitbucket.org/springdom/orientdb-functions-plugin
-     */
+      * You will need to install the YLabs OrientDB Functions plugin if testing on a remote instance
+      * https://bitbucket.org/springdom/orientdb-functions-plugin
+      */
     "add seconds to a date" taggedAs dbTestTag in {
       implicit val db = pool.acquire().get
-      OSQLFunctions.registerPlugins(this)
+      registerFunctions()
       sqlCommand("create class FunctionTest").execute()
       sqlCommand("""insert into FunctionTest(id, timestamp) values (1, date("2015-07-10 12:00:00")) """).execute()
       sqlCommand("update FunctionTest set timestamp = dateTimePlusSeconds(timestamp, 30) where id = 1").execute()

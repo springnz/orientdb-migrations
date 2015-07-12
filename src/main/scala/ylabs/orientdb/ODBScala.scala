@@ -7,9 +7,10 @@ import com.orientechnologies.orient.core.command.OCommandRequest
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.orientechnologies.orient.core.record.impl.ODocument
-import com.orientechnologies.orient.core.sql.{ OSQLEngine, OCommandSQL }
+import com.orientechnologies.orient.core.sql.OCommandSQL
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
-import ylabs.util.{ DateTimeUtil, Logging }
+import ylabs.orientdb.plugin.OSQLFunctions
+import ylabs.util.DateTimeUtil
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable
@@ -18,6 +19,10 @@ import scala.concurrent.{ ExecutionContext, Future }
 object ODBScala extends ODBScala
 
 trait ODBScala {
+
+  def registerFunctions(): Unit = {
+    OSQLFunctions.registerPlugins(this)
+  }
 
   implicit class dbWrapper(db: ODatabaseDocumentTx) {
 
