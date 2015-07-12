@@ -9,7 +9,6 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.sql.{ OSQLEngine, OCommandSQL }
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
-import ylabs.orientdb.functions.OSQLFunctions
 import ylabs.util.{ DateTimeUtil, Logging }
 
 import scala.collection.JavaConverters._
@@ -19,10 +18,6 @@ import scala.concurrent.{ ExecutionContext, Future }
 object ODBScala extends ODBScala
 
 trait ODBScala {
-
-  def registerFunctions(): Unit = {
-    OSQLEngine.getInstance().registerFunction("dateTimePlusSeconds", OSQLFunctions.dateTimeAddSecondsFunction())
-  }
 
   implicit class dbWrapper(db: ODatabaseDocumentTx) {
 
