@@ -115,7 +115,7 @@ trait DocumentDBTest
      * You will need to install the YLabs OrientDB Functions plugin if testing on a remote instance
      * https://bitbucket.org/springdom/orientdb-functions-plugin
      */
-    "add seconds to a date" in {
+    "add seconds to a date" taggedAs dbTestTag in {
       implicit val db = pool.acquire().get
       OSQLFunctions.registerPlugins(this)
       sqlCommand("create class FunctionTest").execute()
