@@ -109,7 +109,7 @@ trait DocumentDBTest
     }
   }
 
-  "DateFunction" should {
+  "CustomFunctions" should {
     /**
       * You will need to install the YLabs OrientDB Functions plugin if testing on a remote instance
       * https://bitbucket.org/springdom/orientdb-functions-plugin
@@ -123,6 +123,14 @@ trait DocumentDBTest
 
       val timestamp = db.qSingleResult("select timestamp from FunctionTest where id = 1").get.getUtcOffsetDateTime("timestamp")
       timestamp.format(DateTimeFormatter.ISO_DATE_TIME) shouldBe "2015-07-10T00:00:30Z"
+      db.close()
+    }
+
+    "calculate pow" taggedAs dbTestTag in {
+      implicit val db = pool.acquire().get
+      registerFunctions()
+      val result = db.qSingleResult("select pow(2, 3).convert('long') as value").get.getLong("value")
+      result shouldBe 8
       db.close()
     }
   }
