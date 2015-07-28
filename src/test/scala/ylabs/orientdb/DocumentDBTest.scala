@@ -12,7 +12,8 @@ import com.orientechnologies.orient.core.storage.ORecordDuplicatedException
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import org.scalatest._
 import ylabs.orientdb.test.ODBTestBase
-
+import ylabs.util.DateTimeUtil
+import ylabs.util.Pimpers._
 import scala.collection.JavaConverters._
 
 trait DocumentDBTest
@@ -21,7 +22,7 @@ trait DocumentDBTest
 
   val dbName = "document-db-test"
 
-  val classNames = List("User", "Person", "StrictClass", "TestClass", "FunctionTest")
+  val classNames = List("User", "Person", "StrictClass", "TestClass", "FunctionTest", "DateTest")
 
   override def beforeAll(): Unit = {
     dropClasses()
@@ -133,6 +134,37 @@ trait DocumentDBTest
       result shouldBe 8
       db.close()
     }
+  }
+
+  "Datetime handling" should {
+    "write/read utc timestamps" taggedAs dbTestTag in new DateTestFixture {
+      implicit val db = pool.acquire().get
+
+      val testClass = createClass(className)
+      testClass.setStrictMode(true)
+      testClass.createProperty(idField, OType.INTEGER).setMandatory(true).createIndex(INDEX_TYPE.UNIQUE)
+      testClass.createProperty(timestampField, OType.DATETIME).setMandatory(true)
+
+      val utcTimestamp = DateTimeUtil.utcDateTime
+      val legacyTimestamp = utcTimestamp.toLegacyDate
+
+      val doc = new ODocument(className)
+      doc.field(idField, 1)
+      doc.field(timestampField, legacyTimestamp)
+      doc.save()
+
+      val result = selectClassDocuments(className).head
+      val resultTimestamp = result.getUtcOffsetDateTime(timestampField)
+      resultTimestamp shouldBe utcTimestamp
+
+      db.close()
+    }
+  }
+
+  trait DateTestFixture {
+    val className = "DateTest"
+    val idField = "idField"
+    val timestampField = "timestamp"
   }
 
   "Document DB" should {
