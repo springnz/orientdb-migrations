@@ -13,7 +13,11 @@ import org.scalatest.concurrent.ScalaFutures._
 
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, ExecutionContext }
-import scala.util.{ Try, _ }
+import scala.util.{Success, Try}
+
+import scalaz.syntax.bind._
+import scalaz.syntax.traverse.ToTraverseOps
+import scalaz.std.list.listInstance
 
 class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfterAll with ODBScala {
 
@@ -208,6 +212,7 @@ class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfte
     "enable us cancelling future" in new Fixture {
       val exceptionThrowingQuery = ODBSession { db ⇒
         throw new IllegalStateException()
+        123 // force type to be Int instead of Nothing
       }
 
       val session = for {
@@ -229,10 +234,10 @@ class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfte
   }
 
   "sequence" should {
-    "convert a Seq of Sessions into a Session of Seq" in new Fixture {
-      val values = Seq(1, 3, 2)
+    "convert a List of Sessions into a Session of List" in new Fixture {
+      val values = List(1, 3, 2)
       val sessions = values.map(value ⇒ ODBSession(_ ⇒ value))
-      ODBSession.sequence(sessions).run().get shouldBe values
+      ODBSession.monad.sequence(sessions).run().get shouldBe values
     }
   }
 

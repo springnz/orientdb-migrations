@@ -6,7 +6,7 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.util.{ Failure, Try }
 
-class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
+final case class ODBSession[+A](block: ODatabaseDocumentTx ⇒ A) {
 
   def run()(implicit dbConnectionPool: ODBConnectionPool): Try[A] =
     dbConnectionPool
@@ -19,7 +19,6 @@ class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
         }) // todo: make nicer
 
   private def run(db: ODatabaseDocumentTx): A = {
-    //db.setCurrentDatabaseInThreadLocal()
     ODatabaseRecordThreadLocal.INSTANCE.set(db)
     val result = block(db)
     closeIfOpen(db)
@@ -58,24 +57,14 @@ class ODBSession[+A](val block: ODatabaseDocumentTx ⇒ A) {
 
   private def closeIfOpen(db: ODatabaseDocumentTx): Unit =
     if (!db.isClosed) db.close()
-
-  // todo scalaZ ? todo verify ?
-  def map[B](fn: A ⇒ B): ODBSession[B] =
-    flatMap(a ⇒ new ODBSession[B](db ⇒ fn(a)))
-
-  def flatMap[B](fn: A ⇒ ODBSession[B]): ODBSession[B] = {
-    new ODBSession[B](db ⇒ fn(block(db)).block(db))
-  }
-
 }
 
+import scalaz._
 object ODBSession {
-  def apply[A](block: ODatabaseDocumentTx ⇒ A): ODBSession[A] = new ODBSession[A](block)
-
-  def map2[A, B, C](a: ODBSession[A], b: ODBSession[B])(f: (A, B) ⇒ C): ODBSession[C] = ??? // todo...just use scalaz
-
-  def sequence[A](sessions: Seq[ODBSession[A]]): ODBSession[Seq[A]] =
-    sessions.foldLeft(ODBSession(_ ⇒ Seq.empty[A])) {
-      case (a, sess) ⇒ a.flatMap(acc ⇒ sess.map(acc :+ _))
-    }
+  implicit val monad = new Monad[ODBSession] {
+    override def point[A](a: => A): ODBSession[A] =
+      ODBSession[A](db => a)
+    override def bind[A, B](fa: ODBSession[A])(f: (A) => ODBSession[B]): ODBSession[B] =
+      ODBSession[B](db ⇒ f(fa.block(db)).block(db))
+  }
 }

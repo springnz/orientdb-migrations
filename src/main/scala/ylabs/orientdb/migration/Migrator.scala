@@ -12,6 +12,7 @@ import ylabs.util.{Logging, DateTimeUtil}
 import ylabs.util.Pimpers._
 
 import scala.util.{ Failure, Try }
+import scalaz.syntax.bind._
 
 case class Migration(version: Int, session: ODBSession[Unit])
 
@@ -97,9 +98,11 @@ object Migrator extends ODBScala with Logging {
 
       createMigrationLogSchema().run().withErrorLog("Error creating MigrationLog schema")
 
+      import scalaz.std.list.listInstance
+
       val sequence = for {
         currentVersion ← findCurrentSchemaVersion
-        migrationResult ← ODBSession.sequence(migrationsToExecute(currentVersion).map(executableMigration))
+        migrationResult ← ODBSession.monad.sequence(migrationsToExecute(currentVersion).map(executableMigration).toList)
       } yield {
         log.info(s"Successfully executed all migrations: ${migrationResult.mkString(",")}")
       }
