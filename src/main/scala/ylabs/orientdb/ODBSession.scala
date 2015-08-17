@@ -59,11 +59,8 @@ final case class ODBSession[+A](block: ODatabaseDocumentTx ⇒ A) {
     if (!db.isClosed) db.close()
 }
 
-object ODBSession extends ODBSessionInstances {
-}
-
 import scalaz._
-abstract sealed class ODBSessionInstances {
+object ODBSession {
   implicit val monad = new Monad[ODBSession] {
     override def point[A](a: => A): ODBSession[A] =
       ODBSession[A](db => a)
