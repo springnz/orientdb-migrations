@@ -249,7 +249,6 @@ class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfte
     }
 
     val createDbAndUsers = ODBSession { implicit db ⇒
-      db.create()
       createClass("User").createProperty("user", OType.STRING).createIndex(INDEX_TYPE.UNIQUE)
       db.declareIntent(new OIntentMassiveInsert())
       db.begin(TXTYPE.NOTX)
@@ -275,7 +274,6 @@ class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfte
     }
 
     val longRunningQuery = ODBSession { implicit db ⇒
-      db.create()
       createClass("User").createProperty("user", OType.STRING).createIndex(INDEX_TYPE.UNIQUE)
       db.declareIntent(new OIntentMassiveInsert())
       db.begin(TXTYPE.NOTX)

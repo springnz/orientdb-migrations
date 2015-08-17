@@ -27,8 +27,14 @@ trait ODBConnectionPool extends LazyLogging {
   lazy val pool: Try[OPartitionedDatabasePool] =
     dbConfig.flatMap(createDatabasePool).withErrorLog("Could not acquire db connection from pool")
 
+  // Creates a pool over database. Database specified in config must exist if it's remote instance.
+  // Memory instance is created adhoc.
   def createDatabasePool(config: ODBConnectConfig): Try[OPartitionedDatabasePool] =
     Try {
+        val db = new ODatabaseDocumentTx(config.host)
+        if (config.host.startsWith("memory:") && !db.exists()) db.create()
+
+      // database need to exist at this stage
       new OPartitionedDatabasePool(config.host, config.user, config.pass)
     }.withErrorLog("Could not create OPartitionedDatabasePool")
 
