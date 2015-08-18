@@ -1,5 +1,4 @@
 package ylabs.orientdb
-
 import com.orientechnologies.orient.core.sql.query.OResultSet
 import gremlin.scala._
 import java.util.{ArrayList => JArrayList}
@@ -168,14 +167,14 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
 
   trait Fixture {
     // val graph = new OrientGraphFactory("remote:localhost/graphtest", "root", "root").getTx()
-    val graph = new OrientGraphFactory(s"memory:test-${math.random}").getTx()
+    val graph = new OrientGraphFactory(s"memory:test-${math.random}").getNoTx
     val gs = GremlinScala(graph)
     val sg = ScalaGraph(graph)
   }
 
   trait TinkerpopFixture {
     // val graph = new OrientGraphFactory("remote:localhost/graphtest", "root", "root").getTx()
-    val graph = new OrientGraphFactory(s"memory:test-${math.random}").getTx()
+    val graph = new OrientGraphFactory(s"memory:test-${math.random}").getNoTx
     val gs = GremlinScala(graph)
     val sg = ScalaGraph(graph)
 
@@ -195,7 +194,7 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
 
   trait RemoteGraphFixture {
     val graphUri = "remote:localhost/test"
-    val graph = new OrientGraphFactory(graphUri, "root", "root").getTx()
+    val graph = new OrientGraphFactory(graphUri, "root", "root").getNoTx()
     val gs = GremlinScala(graph)
     val sg = ScalaGraph(graph)
   }
