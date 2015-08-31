@@ -1,6 +1,6 @@
 package ylabs.orientdb.test
 
-import ylabs.orientdb.ODBConnectConfig
+import ylabs.orientdb.pool.ODBConnectConfig
 
 trait ODBRemoteTest extends ODBTestBase {
 

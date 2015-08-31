@@ -1,6 +1,6 @@
 package ylabs.orientdb.migration
 
-import ylabs.orientdb.ODBConnectionPool
+import ylabs.orientdb.pool.ODBConnectionPool
 import ylabs.util.Logging
 
 import scala.util.{Failure, Success, Try}

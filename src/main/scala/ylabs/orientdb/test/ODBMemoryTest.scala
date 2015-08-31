@@ -1,6 +1,7 @@
 package ylabs.orientdb.test
 
-import ylabs.orientdb.{ODBConnectConfig, ODBSession}
+import ylabs.orientdb.pool.ODBConnectConfig
+import ylabs.orientdb.session.ODBSession
 
 trait ODBMemoryTest extends ODBTestBase {
 

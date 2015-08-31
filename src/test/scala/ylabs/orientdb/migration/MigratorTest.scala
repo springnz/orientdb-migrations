@@ -4,7 +4,7 @@ import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, ShouldMatchers, WordSpec }
 import ylabs.orientdb.ODBScala._
-import ylabs.orientdb.ODBSession
+import ylabs.orientdb.session.ODBSession
 import ylabs.orientdb.test.{ ODBMemoryTest, ODBTestBase }
 import ylabs.util.DateTimeUtil
 import ylabs.util.Pimpers._
