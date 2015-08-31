@@ -1,30 +1,25 @@
 package ylabs.orientdb
 
-import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
-import com.tinkerpop.blueprints.TransactionalGraph.Conclusion
 import com.tinkerpop.blueprints.impls.orient._
-import org.scalatest.WordSpec
-import org.scalatest.ShouldMatchers
+import org.scalatest.{ ShouldMatchers, WordSpec }
 import ylabs.orientdb.test.ODBRemoteTestTag
+
 import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
-import collection.mutable
+import scala.collection.mutable
 
 class GraphDBTest extends WordSpec with ShouldMatchers {
-  // import OrientDBScala._
 
   // first need to run the following with console.sh:
   // CREATE DATABASE remote:localhost/graphtest root root plocal graph
   // val graphFactory = new OrientGraphFactory("remote:localhost/graphtest")
   // val graphFactory = new OrientGraphFactory("plocal:target/databases/test" + math.random)
   val graphFactory = new OrientGraphFactory("memory:test")
-  val graph = graphFactory.setupPool(1, 10)
-    // .getTx
-  .getNoTx
+  val graph = graphFactory.setupPool(1, 10).getNoTx
 
   object Labels extends Enumeration {
     val Listing, User, Session, ViewListing, ViewNumber = Value
   }
+
   import Labels._
   type Id = String
 
@@ -53,7 +48,8 @@ class GraphDBTest extends WordSpec with ShouldMatchers {
       // user.addEdge(ViewListing.toString, listing, Map(s"random property ${math.random}" → math.random))
     }
 
-  "tinkerpop api" ignore {
+  "tinkerpop api" should {
+
     "create scenario graph" taggedAs ODBRemoteTestTag in {
       println("starting to delete the existing elements")
       graph.getEdges.asScala.foreach(_.remove())
@@ -77,12 +73,6 @@ class GraphDBTest extends WordSpec with ShouldMatchers {
 
       println("vertex count: " + graph.getVertices.asScala.size)
       println("edge count: " + graph.getEdges.asScala.size)
-
-      // println(graph.getVertices)
-      // val a: OrientVertex = ???
-      // println(graph.getVertices.asScala)
-      // println(graph.getEdges.asScala)
-      // graph.getVertices.asScala.foreach(vertex ⇒ println(vertex.getProperty("name")))
     }
 
     "insert some DB records" ignore {
