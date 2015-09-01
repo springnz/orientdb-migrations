@@ -57,6 +57,17 @@ class ODBGraphSessionTest extends WordSpec {
         f shouldBe a[ODatabaseException]
       }
     }
+
+    "commits changes" in new Fixture {
+      val session1 = ODBGraphSession { graph ⇒ deleteAllElements(graph) }
+      val session2 = ODBGraphSession { graph ⇒ createVertices(graph, numVertices) }
+      val session3 = ODBGraphSession { graph ⇒ countVertices(graph) }
+
+      session1.run()
+      session3.run().get shouldBe 0
+      session2.run()
+      session3.run().get shouldBe numVertices
+    }
   }
 
   trait Fixture {
