@@ -7,7 +7,7 @@ import ylabs.util.Pimpers._
 
 import scala.util.Try
 
-trait ODBGraphConnectionPool extends AbstractODBConnectionPool[OrientGraph] with LazyLogging {
+trait ODBGraphTP2ConnectionPool extends AbstractODBConnectionPool[OrientGraph] with LazyLogging {
   implicit val log = logger
 
   def dbConfig: Try[ODBGraphConnectConfig]
@@ -39,10 +39,10 @@ trait ODBGraphConnectionPool extends AbstractODBConnectionPool[OrientGraph] with
     factory.map(_.getTx).withErrorLog("Could not acquire db connection from pool")
 }
 
-object ODBGraphConnectionPool {
+object ODBGraphTP2ConnectionPool {
 
   def fromConfig(path: String) = {
-    new ODBGraphConnectionPool {
+    new ODBGraphTP2ConnectionPool {
       override def dbConfig: Try[ODBGraphConnectConfig] = loadDBConfig(path)
     }
   }

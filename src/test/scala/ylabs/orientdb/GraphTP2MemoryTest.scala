@@ -2,19 +2,20 @@ package ylabs.orientdb
 
 import com.tinkerpop.blueprints.impls.orient._
 import org.scalatest.{ ShouldMatchers, WordSpec }
-import ylabs.orientdb.session.ODBGraphSession
-import ylabs.orientdb.test.{ ODBGraphMemoryTest, ODBMemoryTestTag }
+import ylabs.orientdb.session.ODBGraphTP2Session
+import ylabs.orientdb.test.{ ODBGraphTP2MemoryTest, ODBMemoryTestTag }
 import ylabs.util.Logging
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-class GraphDBTest extends WordSpec with ShouldMatchers with ODBGraphMemoryTest with Logging {
+class GraphTP2MemoryTest extends WordSpec with ShouldMatchers with ODBGraphTP2MemoryTest with Logging {
 
   // first need to run the following with console.sh:
   // CREATE DATABASE remote:localhost/graphtest root root plocal graph
   // val graphFactory = new OrientGraphFactory("remote:localhost/graphtest")
   // val graphFactory = new OrientGraphFactory("plocal:target/databases/test" + math.random)
+
   def time[R](block: ⇒ R): R = {
     val t0 = System.nanoTime()
     val result = block // call-by-name
@@ -23,25 +24,24 @@ class GraphDBTest extends WordSpec with ShouldMatchers with ODBGraphMemoryTest w
     result
   }
 
-  "TinkerPop API" should {
+  "TinkerPop2 API" should {
 
     "create scenario graph" taggedAs ODBMemoryTestTag in new Fixture1 {
       import Labels._
 
-      ODBGraphSession { implicit graph ⇒
+      ODBGraphTP2Session { implicit graph ⇒
         deleteAllElements()
-        val ids1 = createVertices(3, Listing)
-        val ids2 = createVertices(3, User)
-        addListingViews(3, ids1 ++ ids2)
+        createVertices(100, Listing)
+        createVertices(100, User)
+        addListingViews(200)
       }.run()
-      Thread.sleep(1000)
-      ODBGraphSession(_.getVertices.asScala.size).run().get shouldBe 20
-      ODBGraphSession(_.getEdges.asScala.size).run().get shouldBe 3
+      ODBGraphTP2Session(_.getVertices.asScala.size).run().get shouldBe 200
+      ODBGraphTP2Session(_.getEdges.asScala.size).run().get shouldBe 200
     }
 
     "insert some DB records" taggedAs ODBMemoryTestTag in {
       time {
-        val names = ODBGraphSession { implicit graph ⇒
+        val names = ODBGraphTP2Session { implicit graph ⇒
           val luca = graph.addVertex(null, "name", "Luca")
           val marko = graph.addVertex(null, "name", "Marko")
           val lucaKnowsMarko = graph.addEdge(null, luca, marko, "knows")
@@ -63,34 +63,26 @@ class GraphDBTest extends WordSpec with ShouldMatchers with ODBGraphMemoryTest w
 
     type Id = String
 
-    def createVertices(count: Int, label: Labels.Value)(implicit graph: OrientGraph): mutable.Map[Labels.Value, Seq[Id]] = {
-      val ids = mutable.Map.empty[Labels.Value, Seq[Id]].withDefaultValue(Seq.empty)
+    def createVertices(count: Int, label: Labels.Value)(implicit graph: OrientGraph): Unit = {
       log.info(s"Creating $count vertices")
       (1 to count) foreach { i ⇒
         val v = graph.addVertex(null, "lbl", label.toString)
-        ids.update(label, ids(label) :+ v.getId.toString)
         // if (i % 1000 == 0) graph.stopTransaction(Conclusion.SUCCESS)
       }
-      println(s"created vertices with label $label: $ids")
-      ids
     }
 
-    def randomVertex(label: Labels.Value, ids: mutable.Map[Labels.Value, Seq[Id]])(implicit graph: OrientGraph) = {
-      val list = ids(label)
-      val number = math.random * list.size
-      val vertices = graph.getVertices().asScala
-      println(s"vertices = $vertices")
-      val selectedId = list(number.toInt)
-      println(s"selected id = $selectedId")
+    def randomVertex(label: Labels.Value)(implicit graph: OrientGraph) = {
+      val vertices = graph.getVertices("lbl", label.toString).asScala.toIndexedSeq
+      val number = math.random * vertices.size
+      val selectedId = vertices(number.toInt)
       graph.getVertex(selectedId)
     }
 
-    def addListingViews(count: Int, ids: mutable.Map[Labels.Value, Seq[Id]])(implicit graph: OrientGraph) = {
+    def addListingViews(count: Int)(implicit graph: OrientGraph) = {
       log.info(s"Creating $count edges")
       (1 to count) foreach { _ ⇒
-        println("ADDING AN EDGE")
-        val user = randomVertex(User, ids)
-        val listing = randomVertex(Listing, ids)
+        val user = randomVertex(User)
+        val listing = randomVertex(Listing)
         graph.addEdge(null, user, listing, ViewListing.toString)
       }
     }

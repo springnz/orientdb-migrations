@@ -2,7 +2,7 @@ package ylabs.orientdb.test
 
 import ylabs.orientdb.pool.ODBGraphConnectConfig
 
-trait ODBGraphMemoryTest extends ODBGraphTestBase {
+trait ODBGraphTP2MemoryTest extends ODBGraphTP2TestBase {
 
   def dbName: String = "test"
 

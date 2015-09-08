@@ -143,6 +143,11 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       traversal.value[String]("name").toSet shouldBe Set("josh")
     }
 
+    "has" taggedAs(org.scalatest.Tag("foo")) in new TinkerpopFixture {
+      def traversal = gs.V.has("age", 27)
+      traversal.value[String]("name").toSet shouldBe Set("vadas")
+    }
+
     "blub" taggedAs(org.scalatest.Tag("foo")) in new TinkerpopFixture {
       // println(Foo.a)
       // println(Foo)
