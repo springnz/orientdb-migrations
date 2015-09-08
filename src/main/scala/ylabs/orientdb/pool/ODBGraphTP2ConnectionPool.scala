@@ -10,9 +10,9 @@ import scala.util.Try
 trait ODBGraphTP2ConnectionPool extends AbstractODBConnectionPool[OrientGraph] with LazyLogging {
   implicit val log = logger
 
-  def dbConfig: Try[ODBGraphConnectConfig]
+  def dbConfig: Try[ODBGraphTP2ConnectConfig]
 
-  def loadDBConfig(path: String)(implicit log: Logger): Try[ODBGraphConnectConfig] =
+  def loadDBConfig(path: String)(implicit log: Logger): Try[ODBGraphTP2ConnectConfig] =
     Try {
       val config = ConfigFactory.load().getConfig(path)
       val host = config.getString("host")
@@ -20,7 +20,7 @@ trait ODBGraphTP2ConnectionPool extends AbstractODBConnectionPool[OrientGraph] w
       val pass = config.getString("pass")
       val minPoolSize = config.getInt("minPoolSize")
       val maxPoolSize = config.getInt("maxPoolSize")
-      val connectConfig = ODBGraphConnectConfig(host, user, pass, minPoolSize, maxPoolSize)
+      val connectConfig = ODBGraphTP2ConnectConfig(host, user, pass, minPoolSize, maxPoolSize)
       log.info(s"Loaded $connectConfig")
       connectConfig
     }.withErrorLog("loadDBConfig failed")
@@ -30,7 +30,7 @@ trait ODBGraphTP2ConnectionPool extends AbstractODBConnectionPool[OrientGraph] w
 
   // Creates a pool over database. Database specified in config must exist if it's remote instance.
   // Memory instance is created adhoc.
-  def createGraphFactory(config: ODBGraphConnectConfig): Try[OrientGraphFactory] =
+  def createGraphFactory(config: ODBGraphTP2ConnectConfig): Try[OrientGraphFactory] =
     Try {
       new OrientGraphFactory(config.host).setupPool(config.minPoolSize, config.maxPoolSize)
     }.withErrorLog("Could not create OrientGraphFactory")
@@ -43,7 +43,7 @@ object ODBGraphTP2ConnectionPool {
 
   def fromConfig(path: String) = {
     new ODBGraphTP2ConnectionPool {
-      override def dbConfig: Try[ODBGraphConnectConfig] = loadDBConfig(path)
+      override def dbConfig: Try[ODBGraphTP2ConnectConfig] = loadDBConfig(path)
     }
   }
 }

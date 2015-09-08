@@ -63,7 +63,7 @@ class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfte
     val userCount = 10
 
     implicit val pool = new ODBConnectionPool {
-      override def dbConfig: Try[ODBConnectConfig] = Success(ODBConnectConfig("memory:doctest-session", "admin", "admin"))
+      def dbConfig: Try[ODBConnectConfig] = Success(ODBConnectConfig("memory:doctest-session", "admin", "admin"))
     }
 
     val createDbAndUsers = ODBSession { implicit db ⇒

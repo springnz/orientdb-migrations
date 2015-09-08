@@ -7,7 +7,7 @@ import org.scalatest.Matchers._
 import org.scalatest._
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures._
-import ylabs.orientdb.pool.{ ODBGraphConnectConfig, ODBGraphTP2ConnectionPool }
+import ylabs.orientdb.pool.{ ODBGraphTP2ConnectConfig, ODBGraphTP2ConnectionPool }
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
@@ -20,8 +20,8 @@ class ODBGraphTP2SessionTest extends WordSpec {
   implicit val ec = ExecutionContext.global
 
   implicit val pool = new ODBGraphTP2ConnectionPool {
-    override def dbConfig: Try[ODBGraphConnectConfig] =
-      Success(ODBGraphConnectConfig("memory:test", "admin", "admin", 1, 20))
+    override def dbConfig: Try[ODBGraphTP2ConnectConfig] =
+      Success(ODBGraphTP2ConnectConfig("memory:test", "admin", "admin", 1, 20))
   }
 
   "ODBGraphSession" should {
