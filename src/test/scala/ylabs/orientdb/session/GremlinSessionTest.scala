@@ -3,10 +3,9 @@ package ylabs.orientdb.session
 import java.util.{ ArrayList ⇒ JArrayList }
 
 import com.orientechnologies.orient.core.sql.query.OResultSet
-import gremlin.scala.ScalaGraph
 import org.apache.tinkerpop.gremlin.orientdb._
 import org.scalatest.{ ShouldMatchers, WordSpec }
-import ylabs.orientdb.pool.{ AbstractODBConnectionPool, ODBGremlinConnectConfig, ODBGremlinConnectionPool }
+import ylabs.orientdb.pool.{ ODBGremlinConnectConfig, ODBGremlinConnectionPool }
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext
