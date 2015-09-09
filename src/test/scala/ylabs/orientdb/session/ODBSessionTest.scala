@@ -32,7 +32,7 @@ class ODBSessionTest extends WordSpec with BeforeAndAfterEach with BeforeAndAfte
         _ ← cleanupUsersAndDb
       } yield y
 
-      val result = session.runAsync()(pool, ec)
+      val result = session.runAsync()
 
       whenReady(result, Timeout(3.seconds)) { f ⇒
         f shouldBe userCount

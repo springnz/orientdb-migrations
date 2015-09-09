@@ -1,4 +1,4 @@
-package ylabs.orientdb
+package ylabs.orientdb.session
 
 import java.util.{ ArrayList ⇒ JArrayList }
 
@@ -7,7 +7,6 @@ import gremlin.scala.ScalaGraph
 import org.apache.tinkerpop.gremlin.orientdb._
 import org.scalatest.{ ShouldMatchers, WordSpec }
 import ylabs.orientdb.pool.{ AbstractODBConnectionPool, ODBGremlinConnectConfig, ODBGremlinConnectionPool }
-import ylabs.orientdb.session.ODBGremlinSession
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext
@@ -24,7 +23,7 @@ class GremlinSessionTest extends WordSpec with ShouldMatchers {
         val v2 = sg.addVertex()
         val v3 = sg.addVertex()
         sg.V(v1.id, v3.id).toList
-      }.run().get
+      }.run()(pool).get
 
       result should have length 2
     }
@@ -35,7 +34,7 @@ class GremlinSessionTest extends WordSpec with ShouldMatchers {
       (1 to 20) foreach { _ ⇒
         sg.addVertex()
       }
-    }.run()
+    }.run()(pool)
 
     val results: Seq[_] = ODBGremlinSession { sg ⇒
       sg.graph.asInstanceOf[OrientGraph].executeSql("select from V limit 10") match {
@@ -43,16 +42,14 @@ class GremlinSessionTest extends WordSpec with ShouldMatchers {
         case r: OResultSet[_]   ⇒ r.iterator().toSeq
         case other              ⇒ println(other.getClass); println(other); ???
       }
-    }.run().get
+    }.run()(pool).get
     results should have length 10
   }
 
   trait Fixture {
-    val graphUri = s"memory:test-${math.random}"
-
-    implicit val pool: AbstractODBConnectionPool[ScalaGraph] = new ODBGremlinConnectionPool {
+    implicit val pool = new ODBGremlinConnectionPool {
       override def dbConfig: Try[ODBGremlinConnectConfig] =
-        Success(ODBGremlinConnectConfig(graphUri, "admin", "admin"))
+        Success(ODBGremlinConnectConfig(s"memory:test-${math.random}", "admin", "admin"))
     }
   }
 }

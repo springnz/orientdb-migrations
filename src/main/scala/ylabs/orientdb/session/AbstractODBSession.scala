@@ -8,7 +8,7 @@ import scalaz.Monad
 
 abstract class AbstractODBSession[+A, Database](val block: Database ⇒ A) {
 
-  def run()(implicit pool: AbstractODBConnectionPool[Database]): Try[A] =
+  def run[Pool <: AbstractODBConnectionPool[Database]]()(implicit pool: Pool): Try[A] =
     pool
       .acquire()
       .flatMap(graph ⇒ Try(run(graph))
