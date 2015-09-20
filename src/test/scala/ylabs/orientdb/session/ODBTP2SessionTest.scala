@@ -7,7 +7,7 @@ import org.scalatest.Matchers._
 import org.scalatest._
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures._
-import ylabs.orientdb.pool.{ ODBGraphTP2ConnectConfig, ODBGraphTP2ConnectionPool }
+import ylabs.orientdb.pool.{ ODBTP2ConnectConfig, ODBTP2ConnectionPool }
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
@@ -15,23 +15,23 @@ import scala.concurrent.duration._
 import scala.util.{ Success, Try }
 import scalaz.syntax.bind._
 
-class ODBGraphTP2SessionTest extends WordSpec {
+class ODBTP2SessionTest extends WordSpec {
 
   implicit val ec = ExecutionContext.global
 
-  implicit val pool = new ODBGraphTP2ConnectionPool {
-    override def dbConfig: Try[ODBGraphTP2ConnectConfig] =
-      Success(ODBGraphTP2ConnectConfig("memory:test", "admin", "admin", 1, 20))
+  implicit val pool = new ODBTP2ConnectionPool {
+    override def dbConfig: Try[ODBTP2ConnectConfig] =
+      Success(ODBTP2ConnectConfig("memory:test", "admin", "admin", 1, 20))
   }
 
   "ODBGraphSession" should {
     "flatMap" in new Fixture {
       val session = for {
-        vertices1 ← ODBGraphTP2Session { graph ⇒ createVertices(graph, numVertices / 2) }
-        vertices2 ← ODBGraphTP2Session { graph ⇒ createVertices(graph, numVertices / 2) }
-        vertexCount ← ODBGraphTP2Session { graph ⇒ countVertices(graph) }
-        _ ← ODBGraphTP2Session { graph ⇒ addEdges(graph, numEdges, vertices1, vertices2) }
-        edgeCount ← ODBGraphTP2Session { graph ⇒ countEdges(graph) }
+        vertices1 ← ODBTP2Session { graph ⇒ createVertices(graph, numVertices / 2) }
+        vertices2 ← ODBTP2Session { graph ⇒ createVertices(graph, numVertices / 2) }
+        vertexCount ← ODBTP2Session { graph ⇒ countVertices(graph) }
+        _ ← ODBTP2Session { graph ⇒ addEdges(graph, numEdges, vertices1, vertices2) }
+        edgeCount ← ODBTP2Session { graph ⇒ countEdges(graph) }
       } yield {
         (vertexCount, edgeCount)
       }
@@ -44,9 +44,9 @@ class ODBGraphTP2SessionTest extends WordSpec {
 
     "fail when database is closed" in new Fixture {
       val session = for {
-        vertices1 ← ODBGraphTP2Session { graph ⇒ createVertices(graph, numVertices / 2) }
-        _ ← ODBGraphTP2Session { _.shutdown() }
-        vertexCount ← ODBGraphTP2Session { graph ⇒ countVertices(graph) }
+        vertices1 ← ODBTP2Session { graph ⇒ createVertices(graph, numVertices / 2) }
+        _ ← ODBTP2Session { _.shutdown() }
+        vertexCount ← ODBTP2Session { graph ⇒ countVertices(graph) }
       } yield {
         vertexCount
       }
@@ -59,9 +59,9 @@ class ODBGraphTP2SessionTest extends WordSpec {
     }
 
     "commits changes" in new Fixture {
-      val session1 = ODBGraphTP2Session { graph ⇒ deleteAllElements(graph) }
-      val session2 = ODBGraphTP2Session { graph ⇒ createVertices(graph, numVertices) }
-      val session3 = ODBGraphTP2Session { graph ⇒ countVertices(graph) }
+      val session1 = ODBTP2Session { graph ⇒ deleteAllElements(graph) }
+      val session2 = ODBTP2Session { graph ⇒ createVertices(graph, numVertices) }
+      val session3 = ODBTP2Session { graph ⇒ countVertices(graph) }
 
       session1.run()
       session3.run().get shouldBe 0

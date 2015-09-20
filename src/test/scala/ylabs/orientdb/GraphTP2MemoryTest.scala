@@ -2,14 +2,13 @@ package ylabs.orientdb
 
 import com.tinkerpop.blueprints.impls.orient._
 import org.scalatest.{ ShouldMatchers, WordSpec }
-import ylabs.orientdb.session.ODBGraphTP2Session
-import ylabs.orientdb.test.{ ODBGraphTP2MemoryTest, ODBMemoryTestTag }
+import ylabs.orientdb.session.ODBTP2Session
+import ylabs.orientdb.test.{ ODBMemoryTestTag, ODBTP2MemoryTest }
 import ylabs.util.Logging
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
-class GraphTP2MemoryTest extends WordSpec with ShouldMatchers with ODBGraphTP2MemoryTest with Logging {
+class GraphTP2MemoryTest extends WordSpec with ShouldMatchers with ODBTP2MemoryTest with Logging {
 
   // first need to run the following with console.sh:
   // CREATE DATABASE remote:localhost/graphtest root root plocal graph
@@ -29,19 +28,19 @@ class GraphTP2MemoryTest extends WordSpec with ShouldMatchers with ODBGraphTP2Me
     "create scenario graph" taggedAs ODBMemoryTestTag in new Fixture1 {
       import Labels._
 
-      ODBGraphTP2Session { implicit graph ⇒
+      ODBTP2Session { implicit graph ⇒
         deleteAllElements()
         createVertices(100, Listing)
         createVertices(100, User)
         addListingViews(200)
       }.run()
-      ODBGraphTP2Session(_.getVertices.asScala.size).run().get shouldBe 200
-      ODBGraphTP2Session(_.getEdges.asScala.size).run().get shouldBe 200
+      ODBTP2Session(_.getVertices.asScala.size).run().get shouldBe 200
+      ODBTP2Session(_.getEdges.asScala.size).run().get shouldBe 200
     }
 
     "insert some DB records" taggedAs ODBMemoryTestTag in {
       time {
-        val names = ODBGraphTP2Session { implicit graph ⇒
+        val names = ODBTP2Session { implicit graph ⇒
           val luca = graph.addVertex(null, "name", "Luca")
           val marko = graph.addVertex(null, "name", "Marko")
           val lucaKnowsMarko = graph.addEdge(null, luca, marko, "knows")

@@ -2,7 +2,7 @@ package ylabs.orientdb.session
 
 import com.tinkerpop.blueprints.impls.orient.OrientGraph
 
-final case class ODBGraphTP2Session[+A](override val block: OrientGraph ⇒ A)
+final case class ODBTP2Session[+A](override val block: OrientGraph ⇒ A)
     extends AbstractODBSession[A, OrientGraph](block) {
 
   def run(graph: OrientGraph): A = {
@@ -15,4 +15,4 @@ final case class ODBGraphTP2Session[+A](override val block: OrientGraph ⇒ A)
     graph.shutdown()
 }
 
-object ODBGraphTP2Session extends ODBSessionInstances[OrientGraph, ODBGraphTP2Session]
+object ODBTP2Session extends ODBSessionInstances[OrientGraph, ODBTP2Session]

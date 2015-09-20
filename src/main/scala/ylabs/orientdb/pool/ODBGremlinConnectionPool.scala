@@ -11,15 +11,15 @@ import scala.util.Try
 trait ODBGremlinConnectionPool extends AbstractODBConnectionPool[ScalaGraph] with LazyLogging {
   implicit val log = logger
 
-  def dbConfig: Try[ODBGremlinConnectConfig]
+  def dbConfig: Try[ODBConnectConfig]
 
-  def loadDBConfig(path: String)(implicit log: Logger): Try[ODBGremlinConnectConfig] =
+  def loadDBConfig(path: String)(implicit log: Logger): Try[ODBConnectConfig] =
     Try {
       val config = ConfigFactory.load().getConfig(path)
       val host = config.getString("host")
       val user = config.getString("user")
       val pass = config.getString("pass")
-      val connectConfig = ODBGremlinConnectConfig(host, user, pass)
+      val connectConfig = ODBConnectConfig(host, user, pass)
       log.info(s"Loaded $connectConfig")
       connectConfig
     }.withErrorLog("loadDBConfig failed")
@@ -29,7 +29,7 @@ trait ODBGremlinConnectionPool extends AbstractODBConnectionPool[ScalaGraph] wit
 
   // Creates a pool over database. Database specified in config must exist if it's remote instance.
   // Memory instance is created adhoc.
-  def createGraphFactory(config: ODBGremlinConnectConfig): Try[OrientGraphFactory] =
+  def createGraphFactory(config: ODBConnectConfig): Try[OrientGraphFactory] =
     Try {
       new OrientGraphFactory(config.host)
     }.withErrorLog("Could not create OrientGraphFactory")
@@ -43,7 +43,7 @@ object ODBGremlinConnectionPool {
 
   def fromConfig(path: String) = {
     new ODBGremlinConnectionPool {
-      override def dbConfig: Try[ODBGremlinConnectConfig] = loadDBConfig(path)
+      override def dbConfig: Try[ODBConnectConfig] = loadDBConfig(path)
     }
   }
 }

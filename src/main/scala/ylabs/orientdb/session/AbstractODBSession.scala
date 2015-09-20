@@ -57,9 +57,9 @@ abstract class AbstractODBSession[+A, Database](val block: Database ⇒ A) {
 abstract class ODBSessionInstances[Database, Session[A] <: AbstractODBSession[A, Database]] {
 
   implicit def monad[T] = new Monad[Session] {
-    override def point[A](a: => A): Session[A] =
-      ODBSessionInstances.this.apply[A](db => a)
-    override def bind[A, B](fa: Session[A])(f: (A) => Session[B]): Session[B] =
+    override def point[A](a: ⇒ A): Session[A] =
+      ODBSessionInstances.this.apply[A](db ⇒ a)
+    override def bind[A, B](fa: Session[A])(f: (A) ⇒ Session[B]): Session[B] =
       ODBSessionInstances.this.apply[B](db ⇒ f(fa.block(db)).block(db))
   }
 

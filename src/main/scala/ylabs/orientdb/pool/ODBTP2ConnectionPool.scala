@@ -7,12 +7,12 @@ import ylabs.util.Pimpers._
 
 import scala.util.Try
 
-trait ODBGraphTP2ConnectionPool extends AbstractODBConnectionPool[OrientGraph] with LazyLogging {
+trait ODBTP2ConnectionPool extends AbstractODBConnectionPool[OrientGraph] with LazyLogging {
   implicit val log = logger
 
-  def dbConfig: Try[ODBGraphTP2ConnectConfig]
+  def dbConfig: Try[ODBTP2ConnectConfig]
 
-  def loadDBConfig(path: String)(implicit log: Logger): Try[ODBGraphTP2ConnectConfig] =
+  def loadDBConfig(path: String)(implicit log: Logger): Try[ODBTP2ConnectConfig] =
     Try {
       val config = ConfigFactory.load().getConfig(path)
       val host = config.getString("host")
@@ -20,7 +20,7 @@ trait ODBGraphTP2ConnectionPool extends AbstractODBConnectionPool[OrientGraph] w
       val pass = config.getString("pass")
       val minPoolSize = config.getInt("minPoolSize")
       val maxPoolSize = config.getInt("maxPoolSize")
-      val connectConfig = ODBGraphTP2ConnectConfig(host, user, pass, minPoolSize, maxPoolSize)
+      val connectConfig = ODBTP2ConnectConfig(host, user, pass, minPoolSize, maxPoolSize)
       log.info(s"Loaded $connectConfig")
       connectConfig
     }.withErrorLog("loadDBConfig failed")
@@ -30,7 +30,7 @@ trait ODBGraphTP2ConnectionPool extends AbstractODBConnectionPool[OrientGraph] w
 
   // Creates a pool over database. Database specified in config must exist if it's remote instance.
   // Memory instance is created adhoc.
-  def createGraphFactory(config: ODBGraphTP2ConnectConfig): Try[OrientGraphFactory] =
+  def createGraphFactory(config: ODBTP2ConnectConfig): Try[OrientGraphFactory] =
     Try {
       new OrientGraphFactory(config.host).setupPool(config.minPoolSize, config.maxPoolSize)
     }.withErrorLog("Could not create OrientGraphFactory")
@@ -39,11 +39,11 @@ trait ODBGraphTP2ConnectionPool extends AbstractODBConnectionPool[OrientGraph] w
     factory.map(_.getTx).withErrorLog("Could not acquire db connection from pool")
 }
 
-object ODBGraphTP2ConnectionPool {
+object ODBTP2ConnectionPool {
 
   def fromConfig(path: String) = {
-    new ODBGraphTP2ConnectionPool {
-      override def dbConfig: Try[ODBGraphTP2ConnectConfig] = loadDBConfig(path)
+    new ODBTP2ConnectionPool {
+      override def dbConfig: Try[ODBTP2ConnectConfig] = loadDBConfig(path)
     }
   }
 }

@@ -5,7 +5,7 @@ import java.util.{ ArrayList ⇒ JArrayList }
 import com.orientechnologies.orient.core.sql.query.OResultSet
 import org.apache.tinkerpop.gremlin.orientdb._
 import org.scalatest.{ ShouldMatchers, WordSpec }
-import ylabs.orientdb.pool.{ ODBGremlinConnectConfig, ODBGremlinConnectionPool }
+import ylabs.orientdb.pool.{ ODBConnectConfig, ODBGremlinConnectionPool }
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext
@@ -47,8 +47,8 @@ class GremlinSessionTest extends WordSpec with ShouldMatchers {
 
   trait Fixture {
     implicit val pool = new ODBGremlinConnectionPool {
-      override def dbConfig: Try[ODBGremlinConnectConfig] =
-        Success(ODBGremlinConnectConfig(s"memory:test-${math.random}", "admin", "admin"))
+      override def dbConfig: Try[ODBConnectConfig] =
+        Success(ODBConnectConfig(s"memory:test-${math.random}", "admin", "admin"))
     }
   }
 }
