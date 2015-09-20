@@ -2,7 +2,8 @@ package ylabs.orientdb.migration
 
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
-import ylabs.orientdb.{ ODBScala, ODBSession }
+import ylabs.orientdb.ODBScala
+import ylabs.orientdb.session.ODBSession
 
 class TestMigrations extends ODBMigrations with ODBScala {
 

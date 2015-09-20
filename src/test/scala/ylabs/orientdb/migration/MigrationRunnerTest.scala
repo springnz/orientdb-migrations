@@ -1,8 +1,9 @@
 package ylabs.orientdb.migration
 
 import org.scalatest.{ ShouldMatchers, WordSpec }
+import ylabs.orientdb.session.ODBSession
 import ylabs.orientdb.test.{ ODBMemoryTest, ODBTestBase }
-import ylabs.orientdb.{ ODBScala, ODBSession }
+import ylabs.orientdb.ODBScala
 
 class MigrationRunnerTest extends WordSpec with ShouldMatchers with ODBTestBase with ODBMemoryTest {
   import ODBScala._

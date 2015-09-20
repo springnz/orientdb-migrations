@@ -7,7 +7,9 @@ import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
 import ylabs.orientdb.ODBScala._
-import ylabs.orientdb.{ ODBConnectionPool, ODBScala, ODBSession }
+import ylabs.orientdb.pool.ODBConnectionPool
+import ylabs.orientdb.session.ODBSession
+import ylabs.orientdb.ODBScala
 import ylabs.util.{Logging, DateTimeUtil}
 import ylabs.util.Pimpers._
 

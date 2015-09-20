@@ -1,4 +1,4 @@
-package ylabs.orientdb
+package ylabs.orientdb.pool
 
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
@@ -8,7 +8,7 @@ import ylabs.util.Pimpers._
 
 import scala.util.Try
 
-trait ODBConnectionPool extends LazyLogging {
+trait ODBConnectionPool extends AbstractODBConnectionPool[ODatabaseDocumentTx] with LazyLogging {
   implicit val log = logger
 
   def dbConfig: Try[ODBConnectConfig]
