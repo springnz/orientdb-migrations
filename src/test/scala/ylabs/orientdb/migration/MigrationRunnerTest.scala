@@ -3,11 +3,8 @@ package ylabs.orientdb.migration
 import org.scalatest.{ ShouldMatchers, WordSpec }
 import ylabs.orientdb.session.ODBSession
 import ylabs.orientdb.test.{ ODBMemoryTest, ODBTestBase }
-import ylabs.orientdb.ODBScala
 
 class MigrationRunnerTest extends WordSpec with ShouldMatchers with ODBTestBase with ODBMemoryTest {
-  import ODBScala._
-
   def dbName = "migration-test"
   def classNames = Seq()
 
@@ -16,7 +13,7 @@ class MigrationRunnerTest extends WordSpec with ShouldMatchers with ODBTestBase 
   "MigrationRunner" should {
 
     "run a migration" in {
-      val executionResult = MigrationRunner.run(Array("db1"), testClassName)
+      val executionResult = MigrationRunner.run(Array("db1", testClassName))
       executionResult.isSuccess shouldBe true
 
       implicit val db = pool.acquire().get

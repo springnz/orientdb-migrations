@@ -3,12 +3,12 @@ package ylabs.orientdb.migration
 import ylabs.orientdb.pool.ODBConnectionPool
 import ylabs.util.Logging
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 object MigrationRunner extends App with Logging {
 
-  def getODBConfigPathFromArgs(args: Array[String]): Try[String] =
-    args.headOption match {
+  def getODBConfigPathFromArgs(arg: Option[String]): Try[String] =
+    arg match {
       case Some(key) ⇒ Success(key)
       case None ⇒
         val msg = "Missing db config argument"
@@ -25,11 +25,11 @@ object MigrationRunner extends App with Logging {
       migrations
     }
 
-  // sbt "run-main ylabs.orientdb.migration.MigrationRunner db"
-  def run(args: Array[String], className: String = "ylabs.orientdb.Migrations"): Try[Unit] = {
+  // sbt "run-main ylabs.orientdb.migration.MigrationRunner db ylabs.orientdb.Migrations"
+  def run(args: Array[String]): Try[Unit] = {
     for {
-      configPath ← getODBConfigPathFromArgs(args)
-      migrations ← loadMigrationsFromClasspath(className)
+      configPath ← getODBConfigPathFromArgs(args.headOption)
+      migrations ← loadMigrationsFromClasspath(args.lastOption.getOrElse("ylabs.orientdb.Migrations"))
     } yield {
       val pool = ODBConnectionPool.fromConfig(configPath)
       Migrator.runMigration(migrations)(pool)
