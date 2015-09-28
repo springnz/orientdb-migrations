@@ -9,6 +9,7 @@ val repo = "https://nexus.prod.corp/content"
 resolvers ++= Seq(
   Resolver.mavenLocal,
   "Orient Technologies Maven2 Repository" at "http://www.orientechnologies.com/listing/m2",
+  "Sonatype OSS" at "https://oss.sonatype.org/content/repositories/public",
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   "spring" at s"$repo/groups/public"
 )
@@ -22,7 +23,7 @@ libraryDependencies ++= Seq(
   "com.orientechnologies" % "orientdb-graphdb" % orientDBVersion,
   "com.orientechnologies" % "orientdb-client" % orientDBVersion,
   "com.michaelpollmeier" %% "gremlin-scala" % "3.0.0.M9-incubating",
-  "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M2-SNAPSHOT"
+  "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M2"
     // "com.orientechnologies" % "orientdb-enterprise" % orientDBVersion,
     // "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0"
 )
