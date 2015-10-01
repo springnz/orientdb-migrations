@@ -4,11 +4,12 @@ import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.{ LazyLogging, Logger }
 import gremlin.scala.ScalaGraph
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory
+import org.apache.tinkerpop.gremlin.orientdb.OrientGraph
 import ylabs.util.Pimpers._
 
 import scala.util.Try
 
-trait ODBGremlinConnectionPool extends AbstractODBConnectionPool[ScalaGraph] with LazyLogging {
+trait ODBGremlinConnectionPool extends AbstractODBConnectionPool[ScalaGraph[OrientGraph]] with LazyLogging {
   implicit val log = logger
 
   def dbConfig: Try[ODBConnectConfig]
@@ -34,7 +35,7 @@ trait ODBGremlinConnectionPool extends AbstractODBConnectionPool[ScalaGraph] wit
       new OrientGraphFactory(config.host)
     }.withErrorLog("Could not create OrientGraphFactory")
 
-  def acquire(): Try[ScalaGraph] = {
+  def acquire(): Try[ScalaGraph[OrientGraph]] = {
     factory.map(_.getNoTx).map(ScalaGraph.apply).withErrorLog("Could not acquire db connection from pool")
   }
 }
