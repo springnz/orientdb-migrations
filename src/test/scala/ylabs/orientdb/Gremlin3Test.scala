@@ -80,7 +80,7 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
       gs.E(e.id).values(key).toList shouldBe List("testValue1")
     }
 
-    "set property during creation" in new Fixture {
+    "set property during creation" ignore new Fixture {
       val v1 = sg.addVertex()
       val v2 = sg.addVertex()
       val property1 = "key1" → "value1"
@@ -173,14 +173,14 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
   trait Fixture {
     // val graph = new OrientGraphFactory("remote:localhost/graphtest", "root", "root").getTx()
     val graph = new OrientGraphFactory(s"memory:test-${math.random}").getNoTx
-    val gs = GremlinScala(graph)
+    val gs = graph.asScala
     val sg = ScalaGraph(graph)
   }
 
   trait TinkerpopFixture {
     // val graph = new OrientGraphFactory("remote:localhost/graphtest", "root", "root").getTx()
     val graph = new OrientGraphFactory(s"memory:test-${math.random}").getNoTx
-    val gs = GremlinScala(graph)
+    val gs = graph.asScala
     val sg = ScalaGraph(graph)
 
     val marko = sg.addVertex("person", Map("name" -> "marko", "age" -> 29))
@@ -200,7 +200,7 @@ class Gremlin3Test extends WordSpec with ShouldMatchers {
   trait RemoteGraphFixture {
     val graphUri = "remote:localhost/test"
     val graph = new OrientGraphFactory(graphUri, "root", "root").getNoTx()
-    val gs = GremlinScala(graph)
+    val gs = graph.asScala
     val sg = ScalaGraph(graph)
   }
 }

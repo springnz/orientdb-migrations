@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.3.0",
   "com.orientechnologies" % "orientdb-graphdb" % orientDBVersion,
   "com.orientechnologies" % "orientdb-client" % orientDBVersion,
-  "com.michaelpollmeier" %% "gremlin-scala" % "3.0.0.M9-incubating",
+  "com.michaelpollmeier" %% "gremlin-scala" % "3.0.1-incubating",
   "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M2"
     // "com.orientechnologies" % "orientdb-enterprise" % orientDBVersion,
     // "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0"
