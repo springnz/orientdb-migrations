@@ -1,7 +1,7 @@
-package ylabs.orientdb.test
+package springnz.orientdb.test
 
-import ylabs.orientdb.pool.ODBConnectConfig
-import ylabs.orientdb.session.ODBSession
+import springnz.orientdb.pool.ODBConnectConfig
+import springnz.orientdb.session.ODBSession
 
 trait ODBMemoryTest extends ODBTestBase {
 

@@ -1,4 +1,4 @@
-package ylabs.orientdb.migration
+package springnz.orientdb.migration
 
 import java.time.OffsetDateTime
 
@@ -6,10 +6,10 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
-import ylabs.orientdb.ODBScala._
-import ylabs.orientdb.pool.ODBConnectionPool
-import ylabs.orientdb.session.ODBSession
-import ylabs.orientdb.ODBScala
+import springnz.orientdb.ODBScala._
+import springnz.orientdb.pool.ODBConnectionPool
+import springnz.orientdb.session.ODBSession
+import springnz.orientdb.ODBScala
 import ylabs.util.{Logging, DateTimeUtil}
 import ylabs.util.Pimpers._
 

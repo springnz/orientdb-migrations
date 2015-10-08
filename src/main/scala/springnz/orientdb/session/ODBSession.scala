@@ -1,4 +1,4 @@
-package ylabs.orientdb.session
+package springnz.orientdb.session
 
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx

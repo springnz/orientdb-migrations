@@ -1,4 +1,4 @@
-package ylabs.orientdb.pool
+package springnz.orientdb.pool
 
 case class ODBConnectConfig(
     host: String, user: String, pass: String) {

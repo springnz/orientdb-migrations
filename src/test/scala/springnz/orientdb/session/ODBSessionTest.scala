@@ -1,4 +1,4 @@
-package ylabs.orientdb.session
+package springnz.orientdb.session
 
 import com.orientechnologies.orient.core.exception.ODatabaseException
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
@@ -10,8 +10,8 @@ import org.scalatest.Matchers._
 import org.scalatest._
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures._
-import ylabs.orientdb.ODBScala
-import ylabs.orientdb.pool.{ ODBConnectConfig, ODBConnectionPool }
+import springnz.orientdb.ODBScala
+import springnz.orientdb.pool.{ ODBConnectConfig, ODBConnectionPool }
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._

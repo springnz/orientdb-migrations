@@ -1,6 +1,6 @@
-package ylabs.orientdb.migration
+package springnz.orientdb.migration
 
-import ylabs.orientdb.pool.ODBConnectionPool
+import springnz.orientdb.pool.ODBConnectionPool
 import ylabs.util.Logging
 
 import scala.util.{ Failure, Success, Try }
@@ -25,11 +25,11 @@ object MigrationRunner extends App with Logging {
       migrations
     }
 
-  // sbt "run-main ylabs.orientdb.migration.MigrationRunner db ylabs.orientdb.Migrations"
+  // sbt "run-main springnz.orientdb.migration.MigrationRunner db springnz.orientdb.Migrations"
   def run(args: Array[String]): Try[Unit] = {
     for {
       configPath ← getODBConfigPathFromArgs(args.headOption)
-      migrations ← loadMigrationsFromClasspath(args.lastOption.getOrElse("ylabs.orientdb.Migrations"))
+      migrations ← loadMigrationsFromClasspath(args.lastOption.getOrElse("springnz.orientdb.Migrations"))
     } yield {
       val pool = ODBConnectionPool.fromConfig(configPath)
       Migrator.runMigration(migrations)(pool)

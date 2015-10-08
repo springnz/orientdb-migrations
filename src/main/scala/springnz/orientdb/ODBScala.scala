@@ -1,4 +1,4 @@
-package ylabs.orientdb
+package springnz.orientdb
 
 import java.time.OffsetDateTime
 import java.util.Date

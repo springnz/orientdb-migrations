@@ -1,6 +1,6 @@
-package ylabs.orientdb.session
+package springnz.orientdb.session
 
-import ylabs.orientdb.pool.AbstractODBConnectionPool
+import springnz.orientdb.pool.AbstractODBConnectionPool
 
 import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.util.{ Failure, Try }

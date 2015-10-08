@@ -1,4 +1,4 @@
-package ylabs.orientdb.pool
+package springnz.orientdb.pool
 
 import scala.util.Try
 

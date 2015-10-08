@@ -1,11 +1,11 @@
-package ylabs.orientdb.session
+package springnz.orientdb.session
 
 import org.scalatest.Matchers._
 import org.scalatest._
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures._
-import ylabs.orientdb.ODBScala
-import ylabs.orientdb.pool.AbstractODBConnectionPool
+import springnz.orientdb.ODBScala
+import springnz.orientdb.pool.AbstractODBConnectionPool
 import ylabs.util.Logging
 
 import scala.concurrent.ExecutionContext

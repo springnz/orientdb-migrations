@@ -1,4 +1,4 @@
-package ylabs.orientdb.pool
+package springnz.orientdb.pool
 
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx

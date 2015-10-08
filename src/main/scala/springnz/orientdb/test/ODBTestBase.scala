@@ -1,9 +1,9 @@
-package ylabs.orientdb.test
+package springnz.orientdb.test
 
 import org.scalatest.Tag
-import ylabs.orientdb.pool.{ ODBConnectionPool, ODBConnectConfig }
-import ylabs.orientdb.session.ODBSession
-import ylabs.orientdb.ODBScala
+import springnz.orientdb.pool.{ ODBConnectionPool, ODBConnectConfig }
+import springnz.orientdb.session.ODBSession
+import springnz.orientdb.ODBScala
 import ylabs.util.Logging
 import ylabs.util.Pimpers._
 

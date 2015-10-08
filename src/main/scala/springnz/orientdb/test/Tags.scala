@@ -1,4 +1,4 @@
-package ylabs.orientdb.test
+package springnz.orientdb.test
 
 import org.scalatest.Tag
 

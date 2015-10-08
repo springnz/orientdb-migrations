@@ -1,14 +1,14 @@
-package ylabs.orientdb.migration
+package springnz.orientdb.migration
 
 import org.scalatest.{ ShouldMatchers, WordSpec }
-import ylabs.orientdb.session.ODBSession
-import ylabs.orientdb.test.{ ODBMemoryTest, ODBTestBase }
+import springnz.orientdb.session.ODBSession
+import springnz.orientdb.test.{ ODBMemoryTest, ODBTestBase }
 
 class MigrationRunnerTest extends WordSpec with ShouldMatchers with ODBTestBase with ODBMemoryTest {
   def dbName = "migration-test"
   def classNames = Seq()
 
-  val testClassName = "ylabs.orientdb.migration.TestMigrations"
+  val testClassName = "springnz.orientdb.migration.TestMigrations"
 
   "MigrationRunner" should {
 
