@@ -3,7 +3,7 @@ package springnz.orientdb.pool
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.typesafe.config.ConfigFactory
-import com.typesafe.scalalogging.{ LazyLogging, Logger }
+import com.typesafe.scalalogging.{LazyLogging, Logger}
 import ylabs.util.Pimpers._
 
 import scala.util.Try
@@ -16,10 +16,11 @@ trait ODBConnectionPool extends AbstractODBConnectionPool[ODatabaseDocumentTx] w
   def loadDBConfig(path: String)(implicit log: Logger): Try[ODBConnectConfig] =
     Try {
       val config = ConfigFactory.load().getConfig(path)
-      val host = config.getString("host")
+      val url = Try { config.getString("url") }
+        .getOrElse(config.getString("host"))
       val user = config.getString("user")
       val pass = config.getString("pass")
-      val connectConfig = ODBConnectConfig(host, user, pass)
+      val connectConfig = ODBConnectConfig(url, user, pass)
       log.info(s"Loaded $connectConfig")
       connectConfig
     }.withErrorLog("loadDBConfig failed")
@@ -31,11 +32,11 @@ trait ODBConnectionPool extends AbstractODBConnectionPool[ODatabaseDocumentTx] w
   // Memory instance is created adhoc.
   def createDatabasePool(config: ODBConnectConfig): Try[OPartitionedDatabasePool] =
     Try {
-        val db = new ODatabaseDocumentTx(config.host)
-        if (config.host.startsWith("memory:") && !db.exists()) db.create()
+      val db = new ODatabaseDocumentTx(config.url)
+      if (config.url.startsWith("memory:") && !db.exists()) db.create()
 
       // database need to exist at this stage
-      new OPartitionedDatabasePool(config.host, config.user, config.pass)
+      new OPartitionedDatabasePool(config.url, config.user, config.pass)
     }.withErrorLog("Could not create OPartitionedDatabasePool")
 
   def acquire(): Try[ODatabaseDocumentTx] =

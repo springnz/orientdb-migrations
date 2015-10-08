@@ -1,11 +1,11 @@
 package springnz.orientdb.pool
 
 case class ODBConnectConfig(
-    host: String, user: String, pass: String) {
-  override def toString = s"ODBConnectConfig(host=$host, user=$user)"
+    url: String, user: String, pass: String) {
+  override def toString = s"ODBConnectConfig(url=$url, user=$user)"
 }
 
 case class ODBTP2ConnectConfig(
-  host: String, user: String, pass: String, minPoolSize: Int, maxPoolSize: Int) {
-  override def toString = s"ODBGraphTP2ConnectConfig(host=$host, user=$user, minPoolSize=$minPoolSize, maxPoolSize=$maxPoolSize)"
+  url: String, user: String, pass: String, minPoolSize: Int, maxPoolSize: Int) {
+  override def toString = s"ODBGraphTP2ConnectConfig(url=$url, user=$user, minPoolSize=$minPoolSize, maxPoolSize=$maxPoolSize)"
 }
