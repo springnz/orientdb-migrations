@@ -1,5 +1,5 @@
-name := "orientdb-lib"
-organization := "ylabs"
+name := "orientdb-scala-utils"
+organization := "springnz"
 scalaVersion := "2.11.7"
 val orientDBVersion = "2.1.2"
 
@@ -15,17 +15,11 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "2.2.4" % Test,
   "ylabs" %% "util-lib" % "1.6.0",
-  "ylabs" % "orientdb-functions-plugin" % "1.2.0",
   "org.scalaz" %% "scalaz-core" % "7.1.3",
   "com.typesafe" % "config" % "1.3.0",
-  "com.orientechnologies" % "orientdb-graphdb" % orientDBVersion,
-  "com.orientechnologies" % "orientdb-client" % orientDBVersion,
-  "com.michaelpollmeier" %% "gremlin-scala" % "3.0.1-incubating",
-  "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M3-SNAPSHOT"
-    // "com.orientechnologies" % "orientdb-enterprise" % orientDBVersion,
-    // "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0"
+  "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M3",
+  "org.scalatest" %% "scalatest" % "2.2.5" % Test
 )
 
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oD")
