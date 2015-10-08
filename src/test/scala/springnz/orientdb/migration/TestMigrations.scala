@@ -7,6 +7,11 @@ import springnz.orientdb.session.ODBSession
 
 class TestMigrations extends ODBMigrations with ODBScala {
 
+  def migration0: ODBSession[Unit] =
+    ODBSession { implicit db ⇒
+      sqlCommand("ALTER DATABASE TIMEZONE UTC").execute()
+    }
+
   val migration1: ODBSession[Unit] = ODBSession { implicit db ⇒
     val oClass = createClass("Person")
     oClass.createProperty("name", OType.STRING)
@@ -23,6 +28,7 @@ class TestMigrations extends ODBMigrations with ODBScala {
   }
 
   val migrations = Seq(
+    Migration(0, migration0),
     Migration(1, migration1),
     Migration(2, migration2),
     Migration(3, migration3))
