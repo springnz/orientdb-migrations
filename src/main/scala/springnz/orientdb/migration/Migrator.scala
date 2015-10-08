@@ -19,7 +19,7 @@ import scalaz.syntax.bind._
 case class Migration(version: Int, session: ODBSession[Unit])
 
 trait ODBMigrations {
-  val migrations: Seq[Migration]
+  def migrations: Seq[Migration]
 }
 
 case class MigrationLog(version: Int, timestamp: OffsetDateTime) {
