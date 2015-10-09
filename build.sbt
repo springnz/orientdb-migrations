@@ -1,7 +1,6 @@
-name := "orientdb-scala-utils"
+name := "orientdb-migrations"
 organization := "springnz"
 scalaVersion := "2.11.7"
-val orientDBVersion = "2.1.2"
 
 fork := true // if OrientDb version > 2.1-RC5
 
