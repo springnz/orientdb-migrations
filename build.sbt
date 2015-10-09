@@ -15,11 +15,11 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "ylabs" %% "util-lib" % "1.6.0",
+  "springnz" %% "util-lib" % "2.0.0",
   "org.scalaz" %% "scalaz-core" % "7.1.3",
   "com.typesafe" % "config" % "1.3.0",
   "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M3",
-  "org.scalatest" %% "scalatest" % "2.2.5" % Test
+  "org.scalatest" %% "scalatest" % "2.2.5"
 )
 
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oD")

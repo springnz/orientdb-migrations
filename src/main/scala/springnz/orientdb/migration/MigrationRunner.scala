@@ -1,7 +1,7 @@
 package springnz.orientdb.migration
 
 import springnz.orientdb.pool.ODBConnectionPool
-import ylabs.util.Logging
+import springnz.util.Logging
 
 import scala.util.{ Failure, Success, Try }
 

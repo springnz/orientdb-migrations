@@ -4,8 +4,8 @@ import org.scalatest.Tag
 import springnz.orientdb.pool.{ ODBConnectionPool, ODBConnectConfig }
 import springnz.orientdb.session.ODBSession
 import springnz.orientdb.ODBScala
-import ylabs.util.Logging
-import ylabs.util.Pimpers._
+import springnz.util.Logging
+import springnz.util.Pimpers._
 
 import scala.util.{ Success, Try }
 

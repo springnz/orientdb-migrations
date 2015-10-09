@@ -10,6 +10,7 @@ class TestMigrations extends ODBMigrations with ODBScala {
   def migration0: ODBSession[Unit] =
     ODBSession { implicit db ⇒
       sqlCommand("ALTER DATABASE TIMEZONE UTC").execute()
+      () //the above orient command returns null - avoid NPEs by explicitly returning Unit
     }
 
   val migration1: ODBSession[Unit] = ODBSession { implicit db ⇒
