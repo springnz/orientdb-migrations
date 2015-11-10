@@ -3,13 +3,16 @@ package springnz.orientdb.pool
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.typesafe.config.ConfigFactory
-import com.typesafe.scalalogging.{LazyLogging, Logger}
+import com.typesafe.scalalogging.{ LazyLogging, Logger }
 import springnz.util.Pimpers._
 
-import scala.util.Try
+import scala.util.{ Success, Try }
 
 trait ODBConnectionPool extends AbstractODBConnectionPool[ODatabaseDocumentTx] with LazyLogging {
   implicit val log = logger
+
+  val maxReconnectAttempts = 3
+  val reconnectDelaySeconds = 1
 
   def dbConfig: Try[ODBConnectConfig]
 
@@ -25,22 +28,47 @@ trait ODBConnectionPool extends AbstractODBConnectionPool[ODatabaseDocumentTx] w
       connectConfig
     }.withErrorLog("loadDBConfig failed")
 
-  lazy val pool: Try[OPartitionedDatabasePool] =
-    dbConfig.flatMap(createDatabasePool).withErrorLog("Could not acquire db connection from pool")
+  private var partitionedDatabasePool: Option[OPartitionedDatabasePool] = None
+
+  private def tryGetOrCreateDatabasePool: Try[OPartitionedDatabasePool] =
+    if (partitionedDatabasePool.isDefined)
+      Success(partitionedDatabasePool.get)
+    else
+      dbConfig.flatMap(tryCreateDatabasePool)
 
   // Creates a pool over database. Database specified in config must exist if it's remote instance.
   // Memory instance is created adhoc.
-  def createDatabasePool(config: ODBConnectConfig): Try[OPartitionedDatabasePool] =
+  private def tryCreateDatabasePool(config: ODBConnectConfig): Try[OPartitionedDatabasePool] =
     Try {
       val db = new ODatabaseDocumentTx(config.url)
-      if (config.url.startsWith("memory:") && !db.exists()) db.create()
-
-      // database need to exist at this stage
-      new OPartitionedDatabasePool(config.url, config.user, config.pass)
+      var newPool = new OPartitionedDatabasePool(config.url, config.user, config.pass).setAutoCreate(true)
+      partitionedDatabasePool = Some(newPool)
+      newPool
     }.withErrorLog("Could not create OPartitionedDatabasePool")
 
-  def acquire(): Try[ODatabaseDocumentTx] =
-    pool.map(_.acquire()).withErrorLog("Could not acquire db connection from pool")
+  private def tryAcquireDatabase(partitionedDatabasePool: OPartitionedDatabasePool): Try[ODatabaseDocumentTx] =
+    Try {
+      partitionedDatabasePool.acquire()
+    }.withErrorLog("Could not acquire db connection from pool")
+
+  def acquire(): Try[ODatabaseDocumentTx] = {
+
+    def isDBOnline(tryDB: Try[ODatabaseDocumentTx]) =
+      tryDB.isSuccess && tryDB.get.exists()
+
+    var db = tryGetOrCreateDatabasePool.flatMap(tryAcquireDatabase)
+
+    var attempts = 1
+    while (!isDBOnline(db) && attempts <= maxReconnectAttempts) {
+      attempts += 1
+      log.warn(s"Could not connect to database. Delaying ${reconnectDelaySeconds} seconds before attempt $attempts of $maxReconnectAttempts")
+      Thread.sleep(reconnectDelaySeconds * 1000)
+      partitionedDatabasePool = None
+      db = tryGetOrCreateDatabasePool.flatMap(tryAcquireDatabase)
+    }
+
+    db
+  }
 }
 
 object ODBConnectionPool {
@@ -51,3 +79,4 @@ object ODBConnectionPool {
     }
   }
 }
+
