@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "springnz" %% "util-lib" % "2.4.0",
   "org.scalaz" %% "scalaz-core" % "7.1.3",
   "com.typesafe" % "config" % "1.3.0",
-  "com.michaelpollmeier" % "orientdb-gremlin" % "3.0.0.M3",
+  "com.orientechnologies" % "orientdb-client" % "2.1.5",
   "org.scalatest" %% "scalatest" % "2.2.5"
 )
 
