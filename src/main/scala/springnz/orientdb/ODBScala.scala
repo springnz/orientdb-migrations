@@ -88,7 +88,7 @@ trait ODBScala {
 
     def getUtcOffsetDateTime(fieldName: String): OffsetDateTime = {
       val jDate = doc.field(fieldName).asInstanceOf[Date]
-      OffsetDateTime.ofInstant(jDate.toInstant, DateTimeUtil.utcZone)
+      OffsetDateTime.ofInstant(jDate.toInstant, DateTimeUtil.UTCTimeZone)
     }
 
     def getInt(fieldName: String): Int =

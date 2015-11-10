@@ -123,7 +123,7 @@ class MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach 
 
   trait Fixture {
     val version = 1
-    val utcNow = DateTimeUtil.utcDateTime
+    val utcNow = DateTimeUtil.utcOffsetDateTime
 
     var successfulMigrationCounter = 0
     var failedMigrationCounter = 0

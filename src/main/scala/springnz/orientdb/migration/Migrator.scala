@@ -6,12 +6,12 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
 import com.orientechnologies.orient.core.metadata.schema.OType
 import com.orientechnologies.orient.core.record.impl.ODocument
+import springnz.orientdb.ODBScala
 import springnz.orientdb.ODBScala._
 import springnz.orientdb.pool.ODBConnectionPool
 import springnz.orientdb.session.ODBSession
-import springnz.orientdb.ODBScala
-import springnz.util.{Logging, DateTimeUtil}
 import springnz.util.Pimpers._
+import springnz.util.{ DateTimeUtil, Logging }
 
 import scala.util.{ Failure, Try }
 import scalaz.syntax.bind._
@@ -127,7 +127,7 @@ object Migrator extends ODBScala with Logging {
   def insertLog(version: Int, result: Boolean = true)(implicit pool: ODBConnectionPool): ODBSession[Unit] =
     ODBSession { implicit db ⇒
       log.info(s"Successfully migrated to version $version")
-      MigrationLog(version, DateTimeUtil.utcDateTime).toDocument.save()
+      MigrationLog(version, DateTimeUtil.utcZonedDateTime.toOffsetDateTime).toDocument.save()
     }
 
 }
