@@ -2,6 +2,7 @@ package springnz.orientdb.migration
 
 import springnz.orientdb.pool.ODBConnectionPool
 import springnz.util.Logging
+import springnz.util.Pimpers._
 
 import scala.util.{ Failure, Success, Try }
 
@@ -23,7 +24,7 @@ object MigrationRunner extends App with Logging {
       val migrations = clazz.newInstance().asInstanceOf[ODBMigrations].migrations
       log.info(s"Found ${migrations.size} migrations")
       migrations
-    }
+    }.withErrorLog("Error loading migrations:")
 
   // sbt "run-main springnz.orientdb.migration.MigrationRunner db springnz.orientdb.Migrations"
   def run(args: Array[String]): Try[Unit] = {
