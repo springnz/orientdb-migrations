@@ -1,5 +1,7 @@
 package springnz.orientdb
 
+import com.orientechnologies.orient.core.metadata.schema.OClass
+import com.orientechnologies.orient.core.metadata.schema.OImmutableClass
 import java.time.OffsetDateTime
 import java.util.Date
 
@@ -57,6 +59,26 @@ trait ODBScala {
 
   def createClass(className: String)(implicit db: ODatabaseDocumentTx) =
     getSchema.createClass(className)
+
+  def createClass(className: String, parent: OClass)(implicit db: ODatabaseDocumentTx) = {
+    getSchema.createClass(className, parent)
+  }
+
+  def createVertexClass(className: String)(implicit db: ODatabaseDocumentTx) = {
+    val V = Option(findClass(OImmutableClass.VERTEX_CLASS_NAME)).getOrElse {
+      // like in TP2 OrientBaseGraph
+      getSchema.createClass(OImmutableClass.VERTEX_CLASS_NAME).setOverSize(2)
+    }
+    createClass(className, V)
+  }
+
+  def createEdgeClass(className: String)(implicit db: ODatabaseDocumentTx) = {
+    val E = Option(findClass(OImmutableClass.EDGE_CLASS_NAME)).getOrElse {
+      // like in TP2 OrientBaseGraph
+      getSchema.createClass(OImmutableClass.EDGE_CLASS_NAME)
+    }
+    createClass(className, E)
+  }
 
   def dropClass(className: String)(implicit db: ODatabaseDocumentTx) =
     getSchema.dropClass(className)
