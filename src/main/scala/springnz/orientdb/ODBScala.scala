@@ -69,7 +69,8 @@ trait ODBScala {
       // like in TP2 OrientBaseGraph
       getSchema.createClass(OImmutableClass.VERTEX_CLASS_NAME).setOverSize(2)
     }
-    createClass(className, V)
+    // vertex classes are prefixed with V_ in the orient driver
+    createClass(OImmutableClass.VERTEX_CLASS_NAME + "_" + className, V)
   }
 
   def createEdgeClass(className: String)(implicit db: ODatabaseDocumentTx) = {
@@ -77,7 +78,8 @@ trait ODBScala {
       // like in TP2 OrientBaseGraph
       getSchema.createClass(OImmutableClass.EDGE_CLASS_NAME)
     }
-    createClass(className, E)
+    // edge classes are prefixed with E_ in the orient driver
+    createClass(OImmutableClass.EDGE_CLASS_NAME + "_" + className, E)
   }
 
   def dropClass(className: String)(implicit db: ODatabaseDocumentTx) =
