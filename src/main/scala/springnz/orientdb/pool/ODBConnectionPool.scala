@@ -2,7 +2,7 @@ package springnz.orientdb.pool
 
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.Config
 import com.typesafe.scalalogging.{ LazyLogging, Logger }
 import springnz.util.Pimpers._
 
@@ -16,9 +16,8 @@ trait ODBConnectionPool extends AbstractODBConnectionPool[ODatabaseDocumentTx] w
 
   def dbConfig: Try[ODBConnectConfig]
 
-  def loadDBConfig(path: String)(implicit log: Logger): Try[ODBConnectConfig] =
+  def loadDBConfig(config: Config)(implicit log: Logger): Try[ODBConnectConfig] =
     Try {
-      val config = ConfigFactory.load().getConfig(path)
       val url = Try { config.getString("url") }
         .getOrElse(config.getString("host"))
       val user = config.getString("user")
@@ -58,10 +57,10 @@ trait ODBConnectionPool extends AbstractODBConnectionPool[ODatabaseDocumentTx] w
 
     var db = tryGetOrCreateDatabasePool.flatMap(tryAcquireDatabase)
 
-    var attempts = 1
-    while (!isDBOnline(db) && attempts <= maxReconnectAttempts) {
+    var attempts = 0
+    while (!isDBOnline(db) && attempts < maxReconnectAttempts) {
       attempts += 1
-      log.warn(s"Could not connect to database. Delaying ${reconnectDelaySeconds} seconds before attempt $attempts of $maxReconnectAttempts")
+      log.warn(s"Could not connect to database. Delaying $reconnectDelaySeconds seconds before attempt $attempts of $maxReconnectAttempts")
       Thread.sleep(reconnectDelaySeconds * 1000)
       partitionedDatabasePool = None
       db = tryGetOrCreateDatabasePool.flatMap(tryAcquireDatabase)
@@ -73,9 +72,9 @@ trait ODBConnectionPool extends AbstractODBConnectionPool[ODatabaseDocumentTx] w
 
 object ODBConnectionPool {
 
-  def fromConfig(path: String) = {
+  def fromConfig(config: Config) = {
     new ODBConnectionPool {
-      override def dbConfig: Try[ODBConnectConfig] = loadDBConfig(path)
+      override def dbConfig: Try[ODBConnectConfig] = loadDBConfig(config)
     }
   }
 }
