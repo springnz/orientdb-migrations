@@ -4,7 +4,7 @@ import com.orientechnologies.orient.core.db.OPartitionedDatabasePool
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.{ LazyLogging, Logger }
-import springnz.util.Pimpers._
+import springnz.orientdb.util.Pimpers._
 
 import scala.util.{ Success, Try }
 

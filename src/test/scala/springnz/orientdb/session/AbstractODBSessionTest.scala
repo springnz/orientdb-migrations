@@ -6,7 +6,7 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures._
 import springnz.orientdb.ODBScala
 import springnz.orientdb.pool.AbstractODBConnectionPool
-import springnz.util.Logging
+import springnz.orientdb.util.Logging
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._

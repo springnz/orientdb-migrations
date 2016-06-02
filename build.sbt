@@ -13,12 +13,15 @@ resolvers ++= Seq(
   "spring" at s"$repo/groups/public"
 )
 
+//val typesafeConfig = "com.typesafe" % "config" % "1.3.0"
+
 libraryDependencies ++= Seq(
-  "springnz" %% "util-lib" % "2.8.0",
   "org.scalaz" %% "scalaz-core" % "7.1.3",
   "com.typesafe" % "config" % "1.3.0",
   "com.orientechnologies" % "orientdb-client" % "2.1.5",
-  "org.scalatest" %% "scalatest" % "2.2.5"
+  "org.scalatest" %% "scalatest" % "2.2.5",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+  "joda-time" % "joda-time" % "2.8.1"
 )
 
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oD")
