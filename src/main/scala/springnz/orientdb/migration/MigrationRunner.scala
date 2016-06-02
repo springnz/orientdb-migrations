@@ -1,5 +1,6 @@
 package springnz.orientdb.migration
 
+import com.typesafe.config.ConfigFactory
 import springnz.orientdb.pool.ODBConnectionPool
 import springnz.orientdb.util.Pimpers._
 import springnz.orientdb.util.Logging
@@ -32,7 +33,8 @@ object MigrationRunner extends App with Logging {
       configPath ← getODBConfigPathFromArgs(args.headOption)
       migrations ← loadMigrationsFromClasspath(args.lastOption.getOrElse("springnz.orientdb.Migrations"))
     } yield {
-      val pool = ODBConnectionPool.fromConfig(configPath)
+      val config = ConfigFactory.load().getConfig(configPath)
+      val pool = ODBConnectionPool.fromConfig(config)
       Migrator.runMigration(migrations)(pool)
     }
   }

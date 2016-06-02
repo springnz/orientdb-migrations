@@ -1,6 +1,6 @@
 name := "orientdb-migrations"
 organization := "springnz"
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 fork := true // if OrientDb version > 2.1-RC5
 
@@ -18,7 +18,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.1.3",
   "com.typesafe" % "config" % "1.3.0",
-  "com.orientechnologies" % "orientdb-client" % "2.1.5",
+  "com.orientechnologies" % "orientdb-client" % "2.1.11",
   "org.scalatest" %% "scalatest" % "2.2.5",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "joda-time" % "joda-time" % "2.8.1"

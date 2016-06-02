@@ -1,13 +1,12 @@
 package springnz.orientdb
 
-import com.orientechnologies.orient.core.metadata.schema.OClass
-import com.orientechnologies.orient.core.metadata.schema.OImmutableClass
 import java.time.OffsetDateTime
 import java.util.Date
 
 import com.orientechnologies.orient.core.command.OCommandRequest
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
+import com.orientechnologies.orient.core.metadata.schema.{ OClass, OImmutableClass, OType }
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.sql.OCommandSQL
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
@@ -104,6 +103,18 @@ trait ODBScala {
       ODatabaseRecordThreadLocal.INSTANCE.set(db)
       block
     }
+
+  def createMandatoryReadOnlyProperty(oClass: OClass, fieldName: String, fieldType: OType) =
+    oClass.createProperty(fieldName, fieldType)
+      .setMandatory(true)
+      .setReadonly(true)
+      .setNotNull(true)
+
+  def createNullableReadOnlyProperty(oClass: OClass, fieldName: String, fieldType: OType) =
+    oClass.createProperty(fieldName, fieldType)
+      .setMandatory(false)
+      .setReadonly(true)
+      .setNotNull(false)
 
   implicit class docPimper(doc: ODocument) {
 
