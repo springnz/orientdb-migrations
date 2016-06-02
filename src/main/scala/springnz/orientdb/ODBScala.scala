@@ -10,7 +10,7 @@ import com.orientechnologies.orient.core.metadata.schema.{ OClass, OImmutableCla
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.sql.OCommandSQL
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
-import springnz.util.DateTimeUtil
+import springnz.orientdb.util.DateTimeUtil
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable

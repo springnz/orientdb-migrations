@@ -10,8 +10,9 @@ import springnz.orientdb.ODBScala
 import springnz.orientdb.ODBScala._
 import springnz.orientdb.pool.ODBConnectionPool
 import springnz.orientdb.session.ODBSession
-import springnz.util.Pimpers._
-import springnz.util.{ DateTimeUtil, Logging }
+import springnz.orientdb.util.DateTimeUtil
+import springnz.orientdb.util.Logging
+import springnz.orientdb.util.Pimpers._
 
 import scala.util.{ Failure, Try }
 import scalaz.syntax.bind._

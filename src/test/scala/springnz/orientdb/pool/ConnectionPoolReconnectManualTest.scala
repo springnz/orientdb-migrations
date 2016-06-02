@@ -3,7 +3,7 @@ package springnz.orientdb.pool
 import org.scalatest._
 import springnz.orientdb.session.ODBSession
 import springnz.orientdb.test.ODBRemoteTest
-import springnz.util.Pimpers._
+import springnz.orientdb.util.Pimpers._
 
 @Ignore
 class ConnectionPoolReconnectManualTest

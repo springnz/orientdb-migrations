@@ -6,8 +6,8 @@ import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, ShouldMatchers, Wo
 import springnz.orientdb.ODBScala._
 import springnz.orientdb.session.ODBSession
 import springnz.orientdb.test.{ ODBMemoryTest, ODBTestBase }
-import springnz.util.DateTimeUtil
-import springnz.util.Pimpers._
+import springnz.orientdb.util.DateTimeUtil
+import springnz.orientdb.util.Pimpers._
 
 class MigratorTest extends WordSpec with ShouldMatchers with BeforeAndAfterEach with BeforeAndAfterAll
     with ODBTestBase with ODBMemoryTest {

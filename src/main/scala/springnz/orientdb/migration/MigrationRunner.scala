@@ -2,10 +2,10 @@ package springnz.orientdb.migration
 
 import com.typesafe.config.ConfigFactory
 import springnz.orientdb.pool.ODBConnectionPool
-import springnz.util.Logging
-import springnz.util.Pimpers._
+import springnz.orientdb.util.Pimpers._
+import springnz.orientdb.util.Logging
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 object MigrationRunner extends App with Logging {
 
